@@ -3,7 +3,6 @@ from django.db import models
 # Create your models here.
 
 
-
 class employee(models.Model):
     employee_id = models.AutoField(primary_key = True)
     employee_name = models.CharField(max_length = 20, null = False, default = "Unknown")
@@ -32,10 +31,11 @@ class cashier(models.Model):
 
 
 class online_user(models.Model):
+    objects = models.Manager()
     user_id = models.AutoField(primary_key = True,default = 1)
     user_name = models.CharField(max_length = 20, null = False, default = "Unknown")
     password = models.CharField(max_length=20, null=False,default = "666666")
-    identity_card = models.CharField(max_length = 18, null = False)
+    identity_card = models.CharField(max_length = 18, null = False,unique=True)
     phone_num = models.CharField(max_length=20, null=False,default = "10086")
     is_frozen = models.BooleanField(null=False, default=False)
     is_lost = models.BooleanField(null=False, default=False)
@@ -43,9 +43,10 @@ class online_user(models.Model):
 
 # 账户表
 class account(models.Model):
+    objects = models.Manager()
     account_id = models.AutoField(primary_key=True)
     password = models.CharField(max_length=20, null=False)
-    identity_card = models.ForeignKey(online_user, on_delete=models.PROTECT)
+    identity_card = models.ForeignKey(online_user, on_delete=models.PROTECT,to_field='identity_card',db_column='identity_card')
     card_type = models.IntegerField(null=False)
     balance = models.FloatField(null=False, default=0.0)
     current_deposit = models.FloatField(null=False, default=0.0)
