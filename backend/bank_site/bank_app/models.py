@@ -3,12 +3,11 @@ from django.db import models
 # Create your models here.
 
 # 例子
-class Student(models.Model):
+'''class Student(models.Model):
     objects = models.Manager()
     student_id = models.CharField(max_length=100)
     student_name = models.CharField(max_length=100)
-
-
+'''
 
 class employee(models.Model):
     employee_id = models.AutoField(primary_key = True)

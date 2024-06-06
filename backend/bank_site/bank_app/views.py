@@ -1,11 +1,8 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from .models import Student
 
-
-# 例子
-class QueryStudent(APIView):
+class QueryCard(APIView):
     @staticmethod
     def get(request):
         """
@@ -28,3 +25,4 @@ class QueryStudent(APIView):
         print('收到:id为{},name为{}'.format(student_id,student_name))
 
         return Response()#不需要返回数据
+
