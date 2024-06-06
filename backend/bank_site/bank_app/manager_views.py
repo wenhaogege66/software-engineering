@@ -42,18 +42,13 @@ def add_cashier(request):
     if request.method == 'POST':
         # data是一个字典，可以用.get()访问键值对
         data = json.loads(request.body.decode('utf-8'))
+        check_account = data.get("account")
+        if cashier.objects.filter(account = check_account).exists():
+            return JsonResponse({"error": "出纳员账户已存在"}, status = 403)
         sex = 0
         if data.get("sex") == "男":
             sex = 0
         else: sex = 1
-        can_trade = True
-        if data.get("ifTrade") == "True":
-            can_trade = True
-        else: can_trade = False
-        can_manage = True
-        if data.get("ifManage") == "True":
-            can_manage = True
-        else: can_manage = False
         new_employee = employee(employee_name = data.get("name"), 
                              identity_card = data.get("identity_card"),
                              employee_sex = sex,
@@ -64,10 +59,10 @@ def add_cashier(request):
         new_cashier = cashier(employee = new_employee,
                               account = data.get("account"),
                               password = data.get("password"),
-                              trade_authority = can_trade,
-                              manage_authority = can_manage)
+                              trade_authority = data.get("trade_authority"),
+                              manage_authority = data.get("manage_authority"))
         new_cashier.save()
-        return JsonResponse({"success": "successful operation"}, status = 200)
+        return JsonResponse({"success": "出纳员添加成功"}, status = 200)
     elif request.method == 'OPTIONS':
         return JsonResponse({"success": "OPTION operation"}, status = 200)
     else: return JsonResponse({"error": "Method not allowed"}, status = 405)
@@ -81,7 +76,7 @@ def delete_cashier(request):
         delete_cashier.delete()
         modify_employee.is_employeed = False
         modify_employee.save()
-        return JsonResponse({"success": "successful operation"}, status = 200)
+        return JsonResponse({"success": "出纳员删除成功"}, status = 200)
     elif request.method == 'OPTIONS':
         return JsonResponse({"success": "OPTION operation"}, status = 200)
     else: return JsonResponse({"error": "Method not allowed"}, status = 405)
@@ -91,6 +86,9 @@ def modify_cashier(request):
     if request.method == "POST":
         data = json.loads(request.body.decode('utf-8'))
         modify_cashier = cashier.objects.get(cashier_id = data.get("id"))
+        if modify_cashier.account != data.get("account"):
+            if cashier.objects.filter(account = data.get("account")).exists():
+                return JsonResponse({"error": "出纳员账户已存在"}, status = 403)
         modify_employee = modify_cashier.employee
         modify_employee.employee_name = data.get("name")
         modify_employee.identity_card = data.get("identity_card")
@@ -102,7 +100,7 @@ def modify_cashier(request):
         modify_cashier.account = data.get("account")
         modify_employee.save()
         modify_cashier.save()
-        return JsonResponse({"success": "successful operation"}, status = 200)
+        return JsonResponse({"success": "修改出纳员成功"}, status = 200)
     elif request.method == 'OPTIONS':
         return JsonResponse({"success": "OPTION operation"}, status = 200)
     else: return JsonResponse({"error": "Method not allowed"}, status = 405)
@@ -115,7 +113,7 @@ def modify_authority(request):
         modify_cashier.trade_authority = data.get("ifTrade")
         modify_cashier.manage_authority = data.get("ifManage")
         modify_cashier.save()
-        return JsonResponse({"success": "successful operation"}, status = 200)
+        return JsonResponse({"success": "修改出纳员权限成功"}, status = 200)
     elif request.method == 'OPTIONS':
         return JsonResponse({"success": "OPTION operation"}, status = 200)
     else: return JsonResponse({"error": "Method not allowed"}, status = 405)

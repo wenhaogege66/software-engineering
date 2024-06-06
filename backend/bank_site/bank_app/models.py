@@ -2,12 +2,7 @@ from django.db import models
 
 # Create your models here.
 
-# 例子
-'''class Student(models.Model):
-    objects = models.Manager()
-    student_id = models.CharField(max_length=100)
-    student_name = models.CharField(max_length=100)
-'''
+
 
 class employee(models.Model):
     employee_id = models.AutoField(primary_key = True)
@@ -37,7 +32,13 @@ class cashier(models.Model):
 
 
 class online_user(models.Model):
+    user_id = models.AutoField(primary_key = True,default = 1)
+    user_name = models.CharField(max_length = 20, null = False, default = "Unknown")
+    password = models.CharField(max_length=20, null=False,default = "666666")
     identity_card = models.CharField(max_length = 18, null = False)
+    phone_num = models.CharField(max_length=20, null=False,default = "10086")
+    is_frozen = models.BooleanField(null=False, default=False)
+    is_lost = models.BooleanField(null=False, default=False)
 
 
 # 账户表
