@@ -81,7 +81,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'fse_db',
         'USER': 'root',
-        'PASSWORD': 'ww71304002ww',
+        'PASSWORD': 'zhpy050109mysql',
         'HOST': 'localhost',
         'PORT': '3306',
     }
