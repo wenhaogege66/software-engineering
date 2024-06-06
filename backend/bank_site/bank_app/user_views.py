@@ -33,16 +33,22 @@ def user_add(request):
         data = json.loads(request.body.decode('utf-8'))
         print('看看data:{}'.format(data))
         filter_online_user = online_user.objects.filter(identity_card=data.get('identity_card'))
+        print('看看filter_online_user:{}'.format(filter_online_user))
         if (not filter_online_user.exists()):
-            new_user = online_user(
-                user_name = data.get('user_name'),
-                password = data.get('password'),
-                identity_card = data.get('identity_card'),
-                phone_num = data.get('phone_num'),
-                is_frozen=False,
-                is_lost=False,
-            )
+            if(online_user.objects.count == 0):
+                cur_id = 1
+                new_user = online_user(
+                    user_id = cur_id,
+                    user_name = data.get('user_name'),
+                    password = data.get('password'),
+                    identity_card = data.get('identity_card'),
+                    phone_num = data.get('phone_num'),
+                    is_frozen=False,
+                    is_lost=False
+                )
+            # print(new_user)
             new_user.save()
+            # print("来啦！！！！！！！")
             return_data = {'state': True}
             return JsonResponse(return_data, status=200)
         else:
