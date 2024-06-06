@@ -32,7 +32,7 @@ class cashier(models.Model):
 
 
 class online_user(models.Model):
-    user_id = models.AutoField(primary_key = True,default = 0)
+    user_id = models.AutoField(primary_key = True,default = 1)
     user_name = models.CharField(max_length = 20, null = False, default = "Unknown")
     password = models.CharField(max_length=20, null=False,default = "666666")
     identity_card = models.CharField(max_length = 18, null = False)

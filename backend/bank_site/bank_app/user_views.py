@@ -33,7 +33,7 @@ def user_add(request):
         data = json.loads(request.body.decode('utf-8'))
         print('看看data:{}'.format(data))
         filter_online_user = online_user.objects.filter(identity_card=data.get('identity_card'))
-        print('看看filter_online_user:{}'.format(filter_online_user))
+        # print('看看filter_online_user:{}'.format(filter_online_user))
         if (not filter_online_user.exists()):
             if(online_user.objects.count == 0):
                 cur_id = 1
@@ -46,13 +46,70 @@ def user_add(request):
                     is_frozen=False,
                     is_lost=False
                 )
+                new_user.save()
+            else:
+                new_user = online_user(
+                    user_name = data.get('user_name'),
+                    password = data.get('password'),
+                    identity_card = data.get('identity_card'),
+                    phone_num = data.get('phone_num'),
+                    is_frozen=False,
+                    is_lost=False
+                )
+                new_user.save()
             # print(new_user)
-            new_user.save()
-            # print("来啦！！！！！！！")
             return_data = {'state': True}
             return JsonResponse(return_data, status=200)
         else:
             return JsonResponse({"error": "User with this identity_card has been exist",'state': False}, status=403)
+    elif request.method == 'OPTION':
+        return JsonResponse({"success": "OPTION operation"}, status=200)
+    else:
+        return JsonResponse({"error": "Method not allowed",'state': True}, status=405)
+    
+@csrf_exempt
+def user_log_in(request):
+    if request.method == 'POST':
+        # 将请求体中的数据转化为json格式
+        data = json.loads(request.body.decode('utf-8'))
+        print('看看data:{}'.format(data))
+        filter_online_user = online_user.objects.filter(user_name=data.get('user_name'))
+        # print('看看filter_online_user:{}'.format(filter_online_user))
+        if (filter_online_user.exists()):
+            # 用户存在开始对照密码
+            cur_user =  online_user.objects.get(user_name = data.get('user_name'))
+            if(data.get('password') == cur_user.password):
+                return_data = {'state': True}
+                return JsonResponse(return_data, status=200)
+            else:
+                # print(new_user)
+                return JsonResponse({"error": "password is wrong",'state': False}, status=200)
+        else:
+            return JsonResponse({"error": "User don't exist",'state': False}, status=403)
+    elif request.method == 'OPTION':
+        return JsonResponse({"success": "OPTION operation"}, status=200)
+    else:
+        return JsonResponse({"error": "Method not allowed",'state': True}, status=405)
+    
+@csrf_exempt
+def user_change_password(request):
+    if request.method == 'POST':
+        # 将请求体中的数据转化为json格式
+        data = json.loads(request.body.decode('utf-8'))
+        print('看看data:{}'.format(data))
+        filter_online_user = online_user.objects.filter(user_name=data.get('user_name'))
+        # print('看看filter_online_user:{}'.format(filter_online_user))
+        if (filter_online_user.exists()):
+            # 用户存在开始对照密码
+            cur_user =  online_user.objects.get(user_name = data.get('user_name'))
+            if(data.get('identity_card') == cur_user.identity_card and data.get('phone_num') == cur_user.phone_num):
+                online_user.objects.filter(user_name = data.get('user_name')).update(password = data.get('new_password'))
+                return_data = {'state': True}
+                return JsonResponse(return_data, status=200)
+            else:
+                return JsonResponse({"error": "information is wrong",'state': False}, status=200)
+        else:
+            return JsonResponse({"error": "User don't exist",'state': False}, status=403)
     elif request.method == 'OPTION':
         return JsonResponse({"success": "OPTION operation"}, status=200)
     else:
