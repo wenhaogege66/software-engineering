@@ -10,6 +10,72 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core import serializers
 
 
+def list_cards(request):
+    # user_id -> List[Card]
+    if request.method == 'GET':
+        filter_users = online_user.objects.filter(user_id=request.GET.get('user_id'))
+        if filter_users.exists():
+            filter_user = filter_users[0]
+        else:
+            return JsonResponse({"error": "User not found"}, status=404)
+        user_idcard = filter_user.identity_card
+        print(f'用户的身份证号码为：{user_idcard}')
+        filter_cards = account.objects.filter(identity_card=user_idcard)
+        results = [{
+            "account_id": card.account_id,
+            "card_type": card.card_type,
+            "balance": card.balance,
+            "is_frozen": card.is_frozen,
+            "is_lost": card.is_lost
+        } for card in filter_cards]
+        return JsonResponse(results, safe=False)
+    else:
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+
+
+@csrf_exempt
+def bind_card(request):
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        print(f'获取到的post数据为：{data}')
+        filter_accounts = account.objects.filter(account_id=data.get('account_id'))
+        if filter_accounts.exists():
+            if filter_accounts[0].password == data.get('password') and filter_accounts[0].identity_card.identity_card == data.get('identity_card'):
+                if filter_accounts[0].is_lost:
+                    return JsonResponse({"error": "The card has been lost", 'state': False}, status=200)
+                filter_accounts.update(identity_card=data.get('identity_card'))
+                return_data = {'state': True}
+                return JsonResponse(return_data, status=200)
+            else:
+                return JsonResponse({"error": "Password is Wrong", 'state': False}, status=200)
+        elif request.method == 'OPTION':
+            return JsonResponse({"success": "OPTION operation"}, status=200)
+    else:
+        return JsonResponse({"error": "Method not allowed", 'state': True}, status=405)
+
+
+@csrf_exempt
+def card_lost(request):
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        filter_accounts = account.objects.filter(account_id=data.get('account_id'))
+        # print(f'获取到的post数据为：{data}')
+        # print(f'获取到的filter_accounts数据为：{filter_accounts[0].password}{filter_accounts[0].identity_card.identity_card}')
+        if filter_accounts.exists():
+            if filter_accounts[0].password == data.get('password') and filter_accounts[0].identity_card.identity_card == data.get('identity_card'):
+                if filter_accounts[0].is_lost:
+                    return JsonResponse({"error": "The card has been lost", 'state': False}, status=200)
+                filter_accounts.update(is_lost=True)
+                return_data = {'state': True}
+                return JsonResponse(return_data, status=200)
+            else:
+                return JsonResponse({"error": "Password is Wrong", 'state': False}, status=200)
+        elif request.method == 'OPTION':
+            return JsonResponse({"success": "OPTION operation"}, status=200)
+    else:
+        return JsonResponse({"error": "Method not allowed", 'state': True}, status=405)
+
+
 def online_bank_query_accounts(request):
     if request.method == 'GET':
         filter_accounts = account.objects.filter(account_id=request.GET.get('accountID'))[0]

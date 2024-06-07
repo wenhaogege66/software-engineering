@@ -115,7 +115,9 @@ class Migration(migrations.Migration):
                 (
                     "identity_card",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.PROTECT,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to_field="identity_card",
+                        db_column="identity_card",
                         to="bank_app.online_user",
                     ),
                 ),
