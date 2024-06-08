@@ -39,8 +39,9 @@ def bind_card(request):
         data = json.loads(request.body.decode('utf-8'))
         print(f'获取到的post数据为：{data}')
         filter_accounts = account.objects.filter(account_id=data.get('account_id'))
-        if filter_accounts.exists():
-            if filter_accounts[0].password == data.get('password') and filter_accounts[0].identity_card.identity_card == data.get('identity_card'):
+        filter_users = online_user.objects.filter(user_id=data.get('user_id'))
+        if filter_accounts.exists() and filter_users.exists():
+            if filter_accounts[0].password == data.get('password') and filter_users[0].identity_card == data.get('identity_card'):
                 if filter_accounts[0].is_lost:
                     return JsonResponse({"error": "The card has been lost", 'state': False}, status=200)
                 filter_accounts.update(identity_card=data.get('identity_card'))
@@ -48,8 +49,8 @@ def bind_card(request):
                 return JsonResponse(return_data, status=200)
             else:
                 return JsonResponse({"error": "Password is Wrong", 'state': False}, status=200)
-        elif request.method == 'OPTION':
-            return JsonResponse({"success": "OPTION operation"}, status=200)
+    elif request.method == 'OPTION':
+        return JsonResponse({"success": "OPTION operation"}, status=200)
     else:
         return JsonResponse({"error": "Method not allowed", 'state': True}, status=405)
 
@@ -58,11 +59,14 @@ def bind_card(request):
 def card_lost(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
-        filter_accounts = account.objects.filter(account_id=data.get('account_id'))
+        filter_users = account.objects.filter(user_id=data.get('user_id'))
+        if not filter_users.exists():
+            return JsonResponse({"error": "User not found", 'state': False}, status=404)
+        filter_accounts = account.objects.filter(account_id=data.get('account_id'), identity_card=filter_users[0].identity_card)
         # print(f'获取到的post数据为：{data}')
         # print(f'获取到的filter_accounts数据为：{filter_accounts[0].password}{filter_accounts[0].identity_card.identity_card}')
         if filter_accounts.exists():
-            if filter_accounts[0].password == data.get('password') and filter_accounts[0].identity_card.identity_card == data.get('identity_card'):
+            if filter_accounts[0].password == data.get('password'):
                 if filter_accounts[0].is_lost:
                     return JsonResponse({"error": "The card has been lost", 'state': False}, status=200)
                 filter_accounts.update(is_lost=True)
@@ -70,8 +74,10 @@ def card_lost(request):
                 return JsonResponse(return_data, status=200)
             else:
                 return JsonResponse({"error": "Password is Wrong", 'state': False}, status=200)
-        elif request.method == 'OPTION':
-            return JsonResponse({"success": "OPTION operation"}, status=200)
+        else:
+            return JsonResponse({"error": "Card not found", 'state': False}, status=404)
+    elif request.method == 'OPTION':
+        return JsonResponse({"success": "OPTION operation"}, status=200)
     else:
         return JsonResponse({"error": "Method not allowed", 'state': True}, status=405)
 
