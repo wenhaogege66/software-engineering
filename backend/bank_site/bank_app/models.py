@@ -54,7 +54,7 @@ class account(models.Model):
     objects = models.Manager()
     account_id = models.AutoField(primary_key=True)
     password = models.CharField(max_length=20, null=False)
-    identity_card = models.ForeignKey(online_user, on_delete=models.PROTECT , to_field='identity_card', db_column='identity_card')
+    identity_card = models.ForeignKey(online_user, on_delete=models.PROTECT)
     card_type = models.IntegerField(null=False)
     balance = models.FloatField(null=False, default=0.0)
     current_deposit = models.FloatField(null=False, default=0.0)
