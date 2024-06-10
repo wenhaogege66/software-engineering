@@ -188,6 +188,92 @@ def user_change_password(request):
         return JsonResponse({"error": "Method not allowed",'state': True}, status=405)
 
 
+def user_account_all_records(request):
+    # 一个疑问，在网页中请求某个账户的所有记录时，需不需要提供账户所属互联网用户的id？如果不需要的话会不会有安全问题？
+    if request.method == 'GET':
+        if (request.GET.get('account_id') != ''
+                and not account.objects.filter(account_id=request.GET.get('account_id')).exists()):
+            # print("Invalid account_id")
+            return JsonResponse({"error": "查询的账户不存在"}, status=403)
+        else:
+            result = []
+            queryset = []
+            filter_deposit_records = deposit_record.objects.filter(account_id=request.GET.get('account_id'))
+            if filter_deposit_records.exists():
+                queryset.extend(filter_deposit_records)
+                queryset = queryset.sort(key=lambda x: x.deposit_start_date)
+                result.append({"deposit": queryset})
+            else:
+                result.append({"deposit": []})
+            queryset = []
+
+            filter_withdrawal_records = withdrawal_record.objects.filter(account_id=request.GET.get('account_id'))
+            if filter_withdrawal_records.exists():
+                queryset = []
+                queryset.extend(filter_withdrawal_records)
+                queryset = queryset.sort(key=lambda x: x.withdrawal_date)
+                result.append({"withdrawal": queryset})
+            else:
+                result.append({"withdrawal": []})
+            queryset = []
+            filter_transfer_records = transfer_record.objects.filter(account_in_id=request.GET.get('account_id'))
+            if filter_transfer_records.exists():
+                queryset = []
+                queryset.extend(filter_transfer_records)
+                queryset = queryset.sort(key=lambda x: x.transfer_date)
+                result.append({"transfer": queryset})
+            else:
+                result.append({"transfer": []})
+            return JsonResponse(result, safe=False, status=200)
+    else:
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+
+
+# 转账
+@csrf_exempt
+def user_account_transfer(request):
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        if data.get('transfer_amount') <= 0:
+            return JsonResponse({"error": "转账金额错误"}, status=403)
+        filter_out_account = account.objects.filter(account_id=data.get('account_out_id'), password=data.get('password'))
+        filter_in_account = account.objects.filter(account_id=data.get('account_in_id'))
+        if not filter_in_account.exists():
+            return JsonResponse({"error": "接收转账用户不存在"}, status=403)
+        if not filter_out_account.exists():
+            return JsonResponse({"error": "存款不足"}, status=403)
+        filter_in_account = filter_in_account.first()
+        filter_out_account = filter_out_account.first()
+        if filter_out_account.is_frozen or filter_out_account.is_lost:
+            return JsonResponse({"error": "转出账户挂失/冻结"}, status=403)
+        if filter_in_account.is_frozen or filter_in_account.is_lost:
+            return JsonResponse({"error": "转入账户挂失/冻结"}, status=403)
+        # 判断用户存款是否满足取出条件
+        if filter_out_account.uncredited_deposit >= data.get('transfer_amount'):
+            # 更新用户存款情况
+            filter_out_account.uncredited_deposit -= data.get('transfer_amount')
+            filter_out_account.balance -= data.get('transfer_amount')
+            filter_out_account.save()
+            filter_in_account.uncredited_deposit += data.get('transfer_amount')
+            filter_in_account.balance += data.get('transfer_amount')
+            filter_in_account.save()
+            # 更新取款记录
+            new_transfer_record = transfer_record(
+                account_in_id=data.get('account_in_id'),
+                account_out_id=data.get('account_out_id'),
+                # --此处存疑--
+                transfer_date=datetime.datetime.now(),
+                # -----
+                transfer_amount=data.get('transfer_amount'),
+            )
+            new_transfer_record.save()
+            return JsonResponse({"success": "successful operation"}, status=200)
+        else:
+            return JsonResponse({"error": "转账用户不存在"}, status=403)
+    elif request.method == 'OPTION':
+        return JsonResponse({"success": "OPTION operation"}, status=200)
+    else:
+        return JsonResponse({"error": "Method not allowed"}, status=405)
 
 # 例子
 # class QueryStudent(APIView):

@@ -57,8 +57,9 @@ class account(models.Model):
 
 # 存款记录
 class deposit_record(models.Model):
+    objects = models.Manager()
     deposit_record_id = models.AutoField(primary_key = True)
-    account_id = models.IntegerField(null = False)
+    account_id = models.AutoField(null = False)
     deposit_type = models.CharField(max_length = 10, null = False)
     auto_renew_status = models.BooleanField()
     deposit_start_date = models.DateField(null = False)
@@ -69,8 +70,9 @@ class deposit_record(models.Model):
 
 # 取款记录
 class withdrawal_record(models.Model):
+    objects = models.Manager()
     withdrawal_record_id = models.AutoField(primary_key = True)
-    account_id = models.IntegerField(null = False)
+    account_id = models.AutoField(null = False)
     withdrawal_date = models.DateField(null = False)
     withdrawal_amount = models.FloatField(null = False)
     cashier_id = models.IntegerField(null = False)
@@ -78,9 +80,10 @@ class withdrawal_record(models.Model):
 
 # 转账记录
 class transfer_record(models.Model):
+    objects = models.Manager()
     transfer_record_id = models.AutoField(primary_key = True)
-    account_in_id = models.IntegerField(null = False)
-    account_out_id = models.IntegerField(null = False)
+    account_in_id = models.AutoField(null = False)
+    account_out_id = models.AutoField(null = False)
     transfer_date = models.DateField(null = False)
     transfer_amount = models.FloatField(null = False)
     cashier_id = models.IntegerField(null = False)
