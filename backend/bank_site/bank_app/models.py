@@ -39,6 +39,7 @@ class online_user(models.Model):
     phone_num = models.CharField(max_length=20, null=False,default = "10086")
     is_frozen = models.BooleanField(null=False, default=False)
     is_lost = models.BooleanField(null=False, default=False)
+    is_blacklisted = models.BooleanField(default=False)
 
 
 # 账户表
@@ -87,3 +88,8 @@ class transfer_record(models.Model):
     transfer_date = models.DateField(null = False)
     transfer_amount = models.FloatField(null = False)
     cashier_id = models.IntegerField(null = False)
+
+class BlackList(models.Model):
+    admin = models.ForeignKey(sys_manage, on_delete=models.CASCADE)
+    user = models.ForeignKey(online_user, on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(auto_now_add=True)

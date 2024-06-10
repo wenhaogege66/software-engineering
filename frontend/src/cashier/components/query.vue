@@ -163,27 +163,31 @@ export default {
             return this.deposit_records.filter(
                 (tuple) =>
                     (this.toSearch == '')  // 搜索框为空，即不搜索
-                //     tuple.bookID == this.toSearch || // 图书号与搜索要求一致
-                //     tuple.borrowTime.toString().includes(this.toSearch) || // 借出时间包含搜索要求
-                //     tuple.returnTime.toString().includes(this.toSearch) // 归还时间包含搜索要求
+                        ,tuple.deposit_record_id === this.toSearch ||
+                         tuple.cashier_id === this.toSearch ||
+                         tuple.deposit_amount >= this.toSearch ||
+                         tuple.deposit_start_date.toString().includes(this.toSearch)||
+                         tuple.deposit_end_date.toString().includes(this.toSearch)
             )
         },
         fitlerTableData_Withdrawl() { // 搜索规则
             return this.withdrawl_records.filter(
                 (tuple) =>
                     (this.toSearch == '')  // 搜索框为空，即不搜索
-                //     tuple.bookID == this.toSearch || // 图书号与搜索要求一致
-                //     tuple.borrowTime.toString().includes(this.toSearch) || // 借出时间包含搜索要求
-                //     tuple.returnTime.toString().includes(this.toSearch) // 归还时间包含搜索要求
+                    ,tuple.withdrawl_record_id === this.toSearch ||
+                    tuple.cashier_id === this.toSearch ||
+                    tuple.withdrawl_amount >= this.toSearch ||
+                    tuple.withdrawl_date.toString().includes(this.toSearch)
             )
         },
         fitlerTableData_Transfer() { // 搜索规则
             return this.transfer_records.filter(
                 (tuple) =>
-                    (this.toSearch == '')  // 搜索框为空，即不搜索
-                //     tuple.bookID == this.toSearch || // 图书号与搜索要求一致
-                //     tuple.borrowTime.toString().includes(this.toSearch) || // 借出时间包含搜索要求
-                //     tuple.returnTime.toString().includes(this.toSearch) // 归还时间包含搜索要求
+                    (this.toSearch == '')
+                    ,tuple.transfer_record_id === this.toSearch ||
+                    tuple.cashier_id === this.toSearch ||
+                    tuple.transfer_amount >= this.toSearch ||
+                    tuple.transfer_date.toString().includes(this.toSearch) 
             )
         }
     },
@@ -238,7 +242,7 @@ export default {
         },
     },
     mounted() { // 当页面被渲染时
-        // this.QueryRecords() // 查询存款记录
+         this.QueryRecords() // 查询存款记录
     }
 
 }
