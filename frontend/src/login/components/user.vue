@@ -51,11 +51,22 @@ export default{
     return{
       account: "", // 用户登录，还不知道用什么
       password: "",
+      user:{
+        id: '',
+      },
     }
   },
   methods: {
     handle (){
-      window.location.href = "/online_user";
+      axios.post('http://127.0.0.1:8000/user/sign_in/',{
+        user_name: this.account,
+        password: this.password,
+      }).then(response => {
+        window.location.href = "/online_user?user_id=" + this.user.id ;  // 函数内部进行超链接跳转
+      }).catch(error => {
+        ElMessage.error(error.response.data.error);
+        //this.password = "";
+      })
     }
   },
   mounted() { // 当页面被渲染时

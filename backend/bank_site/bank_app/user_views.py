@@ -198,7 +198,7 @@ def user_account_all_records(request):
         else:
             result = []
             queryset = []
-            filter_deposit_records = deposit_record.objects.filter(account_id=request.GET.get('account_id'))
+            filter_deposit_records = deposit_record.objects.filter(account_id=int(request.GET.get('account_id')))
             if filter_deposit_records.exists():
                 queryset.extend(filter_deposit_records)
                 queryset = queryset.sort(key=lambda x: x.deposit_start_date)
@@ -207,7 +207,7 @@ def user_account_all_records(request):
                 result.append({"deposit": []})
             queryset = []
 
-            filter_withdrawal_records = withdrawal_record.objects.filter(account_id=request.GET.get('account_id'))
+            filter_withdrawal_records = withdrawal_record.objects.filter(account_id=int(request.GET.get('account_id')))
             if filter_withdrawal_records.exists():
                 queryset = []
                 queryset.extend(filter_withdrawal_records)
@@ -216,7 +216,7 @@ def user_account_all_records(request):
             else:
                 result.append({"withdrawal": []})
             queryset = []
-            filter_transfer_records = transfer_record.objects.filter(account_in_id=request.GET.get('account_id'))
+            filter_transfer_records = transfer_record.objects.filter(account_in_id=int(request.GET.get('account_id')))
             if filter_transfer_records.exists():
                 queryset = []
                 queryset.extend(filter_transfer_records)
@@ -236,8 +236,8 @@ def user_account_transfer(request):
         data = json.loads(request.body.decode('utf-8'))
         if data.get('transfer_amount') <= 0:
             return JsonResponse({"error": "转账金额错误"}, status=403)
-        filter_out_account = account.objects.filter(account_id=data.get('account_out_id'), password=data.get('password'))
-        filter_in_account = account.objects.filter(account_id=data.get('account_in_id'))
+        filter_out_account = account.objects.filter(account_id=int(data.get('account_out_id')), password=data.get('password'))
+        filter_in_account = account.objects.filter(account_id=int(data.get('account_in_id')))
         if not filter_in_account.exists():
             return JsonResponse({"error": "接收转账用户不存在"}, status=403)
         if not filter_out_account.exists():

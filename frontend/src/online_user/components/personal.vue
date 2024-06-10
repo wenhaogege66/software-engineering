@@ -28,8 +28,8 @@
             </div>
             <div style="height: 25px"></div>
             <div style = "margin-left: 4.3vw; font-weight: bold; font-size: 1rem; margin-top: 5px;">
-              旧密码：
-              <el-input v-model="old_password" style="width: 12.5vw; margin-left: 1rem" type="password" maxlength="20" clearable/>
+              用户名：
+              <el-input v-model="account" style="width: 12.5vw; margin-left: 1rem" type="password" maxlength="20" clearable/>
             </div>
             <div style="height: 25px"></div>
             <div style = "margin-left: 4.3vw; font-weight: bold; font-size: 1rem; margin-top: 5px;">
@@ -50,10 +50,31 @@
     </el-scrollbar>
   </template>
   <script>
+
+  import axios from "axios";
+  import {ElMessage} from "element-plus";
   export default{
+data(){
+      return{
+        account: "",
+        IDCard: "",
+        phone: "",
+        new_password: "",
+      }
+    },
 methods: {
     handle (){
-      window.location.href = "/login/user";
+      axios.post('http://127.0.0.1:8000/user/change_password/',{
+        user_name: this.account,
+        identity_card: this.IDCard,
+        phone_num: this.phone,
+        new_password: this.new_password,
+      }).then(response => {
+        window.location.href = "/login";  // 函数内部进行超链接跳转
+      }).catch(error => {
+        ElMessage.error(error.response.data.error);
+        //this.password = "";
+      })
     }
   }
 }

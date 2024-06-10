@@ -18,7 +18,7 @@
   <!-- <div class="cashierBox" v-for="record in records" :key="record.deposit_record_id"> -->
   <!-- </div> -->
 
-      <el-dialog v-model="DemandDepositVisible" title="活期存款" width="30%" align-center :before-close="handleClose">
+      <el-dialog v-model="DemandDepositVisible" title="活期存款" width="30%" align-center>
           <div style="margin-left: 2vw; font-weight: bold; font-size: 1rem; margin-top: 20px; ">
               账户ID：
               <!-- <el-input v-model="newDepositInfo.account_id" style="width: 12.5vw;" clearable /> -->
