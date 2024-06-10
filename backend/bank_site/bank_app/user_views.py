@@ -147,15 +147,17 @@ def user_log_in(request):
         print('看看data:{}'.format(data))
         filter_online_user = online_user.objects.filter(user_name=data.get('user_name'))
         # print('看看filter_online_user:{}'.format(filter_online_user))
-        if (filter_online_user.exists()):
+        if filter_online_user.exists():
             # 用户存在开始对照密码
             cur_user =  online_user.objects.get(user_name = data.get('user_name'))
-            if(data.get('password') == cur_user.password):
-                return_data = {'state': True}
+            print(f"文豪说看看这个密码: {cur_user.password}")
+            if data.get('password') == cur_user.password:
+                return_data = {'user_id': cur_user.user_id, 'state': True}
                 return JsonResponse(return_data, status=200)
             else:
+                print("看看这里")
                 # print(new_user)
-                return JsonResponse({"error": "password is wrong",'state': False}, status=200)
+                return JsonResponse({"error": "password is wrong",'state': False}, status=400)
         else:
             return JsonResponse({"error": "User don't exist",'state': False}, status=403)
     elif request.method == 'OPTION':
@@ -179,7 +181,7 @@ def user_change_password(request):
                 return_data = {'state': True}
                 return JsonResponse(return_data, status=200)
             else:
-                return JsonResponse({"error": "information is wrong",'state': False}, status=200)
+                return JsonResponse({"error": "information is wrong",'state': False}, status=400)
         else:
             return JsonResponse({"error": "User don't exist",'state': False}, status=403)
     elif request.method == 'OPTION':

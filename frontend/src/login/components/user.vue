@@ -58,12 +58,14 @@ export default{
   },
   methods: {
     handle (){
+      // console.log( "文豪说看看这个6666")
       axios.post('http://127.0.0.1:8000/user/sign_in/',{
         user_name: this.account,
         password: this.password,
       }).then(response => {
-        window.location.href = "/online_user?user_id=" + this.user.id ;  // 函数内部进行超链接跳转
-      }).catch(error => {
+        window.location.href = "/online_user?user_id=" + response.data.user_id ;  // 函数内部进行超链接跳转
+        // console.log( "文豪说看看这个",response.data)
+        }).catch(error => {
         ElMessage.error(error.response.data.error);
         //this.password = "";
       })

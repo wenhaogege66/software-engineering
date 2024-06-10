@@ -68,7 +68,7 @@
       axios.post('http://127.0.0.1:8000/user/sign_up/',{
         user_name: this.account,
         password: this.password,
-        identify_card: this.IDCard,
+        identity_card: this.IDCard,
         phone_num: this.phone
       }).then(response => {
         
