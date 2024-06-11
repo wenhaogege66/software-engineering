@@ -97,6 +97,7 @@ class transfer_record(models.Model):
     cashier_id = models.IntegerField(null = False)
 
 class BlackList(models.Model):
-    admin = models.ForeignKey(sys_manage, on_delete=models.CASCADE)
-    user = models.ForeignKey(online_user, on_delete=models.CASCADE)
+    list_id = models.AutoField(primary_key = True)
+    manager_id = models.ForeignKey(online_bank_manager, on_delete=models.CASCADE,default=1)
+    user_id = models.ForeignKey(online_user, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
