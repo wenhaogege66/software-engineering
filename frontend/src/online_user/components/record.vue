@@ -28,16 +28,22 @@
     <div style="width: 70%; margin-left: 30px; padding-top: 5vh">
       <!-- <el-input v-model="this.toQuery" style="display:inline; " placeholder="输入银行卡号"></el-input> -->
       <!-- <el-radio style="margin-left: 10px;" v-model="deposit_checked">存款记录</el-radio>
-      <el-radio style="margin-left: 10px;" v-model="withdrawl_checked">取款记录</el-radio>
+      <el-radio style="margin-left: 10px;" v-model="withdrawal_checked">取款记录</el-radio>
       <el-radio style="margin-left: 10px;" v-model="transfer_checked">转账记录</el-radio> -->
-      <el-radio-group style="margin-left: 10px" v-model="select">
+      <div style="display: flex;flex-direction: row">
+      <el-radio-group style="margin: 10px" v-model="select">
         <el-radio :label="1">存款记录</el-radio>
         <el-radio :label="2">取款记录</el-radio>
         <el-radio :label="3">转账记录</el-radio>
       </el-radio-group>
+        <el-form-item label="查询卡号" style="margin: 10px">
+          <el-input v-model="toQuery" ></el-input>
+        </el-form-item>
+    </div>
       <el-button
         style="margin-left: 100px"
         type="primary"
+        :disabled="toQuery.length===0"
         @click="this.QueryRecords"
         >查询</el-button
       >
@@ -45,13 +51,11 @@
 
     <!-- 存款记录 -->
     <el-table
-      v-for="deposit_record in deposit_records"
       :data="fitlerTableData_Deposit"
-      :v-show="this.isDepositShow"
+      v-show="this.isDepositShow"
       height="600"
       :default-sort="{ prop: 'deposit_start_date', order: 'ascending' }"
       :table-layout="'auto'"
-      :key="deposit_record"
       style="
         width: 100%;
         margin-left: 50px;
@@ -62,19 +66,17 @@
     >
       <el-table-column prop="account_id" label="账户ID" />
       <el-table-column prop="deposit_type" label="存款类型" sortable />
-      <el-table-column prop="deposit_amount" lable="存款金额" sortable />
+      <el-table-column prop="deposit_amount" label="存款金额" sortable />
       <el-table-column prop="deposit_start_date" label="存款时间" sortable />
       <el-table-column prop="deposit_end_date" label="存款结束时间" sortable />
       <el-table-column prop="cashier_id" label="操作账户" sortable />
     </el-table>
     <!--取款-->
     <el-table
-      :v-show="this.isWithdrawlShow"
-      v-for="withdrawl_record in withdrawl_records"
-      :data="fitlerTableData_Withdrawl"
-      :key="withdrawl_record"
+      v-show="this.iswithdrawalShow"
+      :data="fitlerTableData_withdrawal"
       height="600"
-      :default-sort="{ prop: 'withdrawl_date', order: 'ascending' }"
+      :default-sort="{ prop: 'withdrawal_date', order: 'ascending' }"
       :table-layout="'auto'"
       style="
         width: 100%;
@@ -85,17 +87,15 @@
       "
     >
       <el-table-column prop="account_id" label="账户ID" />
-      <el-table-column prop="withdrawl_amount" lable="取款金额" sortable />
-      <el-table-column prop="withdrawl_date" label="取款时间" sortable />
+      <el-table-column prop="withdrawal_amount" label="取款金额" sortable />
+      <el-table-column prop="withdrawal_date" label="取款时间" sortable />
 
       <el-table-column prop="cashier_id" label="操作账户" sortable />
     </el-table>
     <!--交易-->
     <el-table
-      :v-show="this.isTransferShow"
-      v-for="transfer_record in transfer_records"
+      v-show="this.isTransferShow"
       :data="fitlerTableData_Transfer"
-      :key="transfer_record"
       height="600"
       :default-sort="{ prop: 'deposit_start_date', order: 'ascending' }"
       :table-layout="'auto'"
@@ -109,7 +109,7 @@
     >
       <el-table-column prop="account_in_id" label="收款账户ID" />
       <el-table-column prop="account_out_id" label="转款账户ID" sortable />
-      <el-table-column prop="transfer_amount" lable="交易金额" sortable />
+      <el-table-column prop="transfer_amount" label="交易金额" sortable />
       <el-table-column prop="transfer_date" label="交易时间" sortable />
       <el-table-column prop="cashier_id" label="操作账户" sortable />
     </el-table>
@@ -127,7 +127,7 @@ export default {
       nowdate: "",
       cashierID: 1,
       isDepositShow: false, // 存款记录展示状态
-      isWithdrawlShow: false, // 取款记录展示状态
+      iswithdrawalShow: false, // 取款记录展示状态
       isTransferShow: false, // 转账记录展示状态
       select: 0,
       deposit_records: [
@@ -143,13 +143,13 @@ export default {
           cashier_id: 1,
         },
       ],
-      withdrawl_records: [
+      withdrawal_records: [
         {
           // 列表项
-          withdrawl_record_id: 1,
+          withdrawal_record_id: 1,
           account_id: 1,
-          withdrawl_date: 1,
-          withdrawl_amount: 100.0,
+          withdrawal_date: 1,
+          withdrawal_amount: 100.0,
           cashier_id: 1,
         },
       ],
@@ -165,7 +165,7 @@ export default {
         },
       ],
       deposit_checked: false,
-      withdrawl_checked: false,
+      withdrawal_checked: false,
       transfer_checked: false,
       DemandDepositVisible: false,
       TimeDepositVisible: false,
@@ -203,55 +203,48 @@ export default {
     fitlerTableData_Deposit() {
       // 搜索规则
       return this.deposit_records.filter(
-        (tuple) => this.toSearch == "", // 搜索框为空，即不搜索
-        tuple.deposit_record_id === this.toSearch ||
+        (tuple) =>
+            (this.toSearch === "")|| // 搜索框为空，即不搜索
+          tuple.deposit_record_id === this.toSearch ||
           tuple.cashier_id === this.toSearch ||
           tuple.deposit_amount >= this.toSearch ||
           tuple.deposit_start_date.toString().includes(this.toSearch) ||
           tuple.deposit_end_date.toString().includes(this.toSearch)
       );
     },
-    fitlerTableData_Withdrawl() {
+    fitlerTableData_withdrawal() {
       // 搜索规则
-      return this.withdrawl_records.filter(
-        (tuple) => this.toSearch == "", // 搜索框为空，即不搜索
-        tuple.withdrawl_record_id === this.toSearch ||
+      return this.withdrawal_records.filter(
+        (tuple) =>
+            ( this.toSearch === "")|| // 搜索框为空，即不搜索
+          tuple.withdrawal_record_id === this.toSearch ||
           tuple.cashier_id === this.toSearch ||
-          tuple.withdrawl_amount >= this.toSearch ||
-          tuple.withdrawl_date.toString().includes(this.toSearch)
+          tuple.withdrawal_amount >= this.toSearch ||
+          tuple.withdrawal_date.toString().includes(this.toSearch)
       );
     },
     fitlerTableData_Transfer() {
       // 搜索规则
       return this.transfer_records.filter(
-        (tuple) => this.toSearch == "",
-        tuple.transfer_record_id === this.toSearch ||
+        (tuple) =>
+            (this.toSearch === "") ||
+          tuple.transfer_record_id === this.toSearch ||
           tuple.cashier_id === this.toSearch ||
           tuple.transfer_amount >= this.toSearch ||
           tuple.transfer_date.toString().includes(this.toSearch)
-      );
+        );
     },
   },
   methods: {
-    fetchDataFromUrl() {
-      // 获取当前URL
-      const url = new URL(window.location);
-
-      // 创建URLSearchParams对象
-      const params = new URLSearchParams(url.search);
-
-      // 从查询字符串中获取参数
-      this.cashierID = params.get("cashierID");
-    },
     async QueryRecords() {
       // console.log(this.deposit_records)
       (this.deposit_records = []),
-        (this.withdrawl_records = []),
+        (this.withdrawal_records = []),
         (this.transfer_records = []);
-      let response = await axios.get("/online_user/all-records/", {
+      let response = await axios.get("http://127.0.0.1:8000/user/list_records/", {
         params: {
           account_id: this.toQuery,
-          record_type: this.select,
+          record_type: parseInt(this.select),
         },
       });
       let records = response.data; // 获取响应负载
@@ -261,22 +254,29 @@ export default {
           this.deposit_records.push(record); // 将它加入到列表项中
         });
         this.isDepositShow = true; // 显示结果列表
+        this.iswithdrawalShow = false;
+        this.isTransferShow = false;
       } else this.isDepositShow = false;
 
       //取款记录
       if (this.select === 2) {
         records.forEach((record) => {
-          this.withdrawl_records.push(record); // 将它加入到列表项中
+          this.withdrawal_records.push(record); // 将它加入到列表项中
         });
-        this.isWithdrawlShow = true; // 显示结果列表
-      } else this.isWithdrawlShow = false;
+        this.iswithdrawalShow = true; // 显示结果列表
+        this.isDepositShow = false;
+        this.isTransferShow = false;
+      } else this.iswithdrawalShow = false;
 
       //转账记录
       if (this.select === 3) {
         records.forEach((record) => {
           this.transfer_records.push(record); // 将它加入到列表项中
         });
+        //console.log(this.transfer_records[0])
         this.isTransferShow = true; // 显示结果列表
+        this.iswithdrawalShow = false;
+        this.isDepositShow = false;
       } else this.isTransferShow = false;
     },
     //   editAuto(data) {

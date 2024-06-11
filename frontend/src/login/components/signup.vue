@@ -71,7 +71,7 @@
         identity_card: this.IDCard,
         phone_num: this.phone
       }).then(response => {
-        
+
         window.location.href = "/login";  // 函数内部进行超链接跳转
       }).catch(error => {
         ElMessage.error(error.response.data.error);

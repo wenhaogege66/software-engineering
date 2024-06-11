@@ -10,13 +10,10 @@
     <p style="font-weight: bold;font-size: larger;margin: 10px" >用户名 : {{user_info.user_name}}</p>
     <p style="font-weight: bold;font-size: larger;margin: 10px" >电话号码 : {{user_info.phone_num}}</p>
   </div>
-  <!-- 存款操作 -->
 
-  <!-- 存款记录 -->
-  <!-- <div class="cashierBox" v-for="record in records" :key="record.deposit_record_id"> -->
-  <!-- </div> -->
-
-
+    <div style="margin-top: 40px; margin-left: 40px; font-size: 1.5em; font-weight: bold;">
+      账户列表/卡包
+    </div>
     <div style="display: flex;flex-wrap: wrap; justify-content: start;">
     <!-- 借书证卡片 -->
     <div class="cardBox" v-for="card in cards"  :key="card.account_id">
@@ -49,16 +46,16 @@
 
       </div>
     </div>
-
+<!--
       <el-button class="newCardBox"
                  @click="newCardInfo.account_id = '', newCardInfo.identity_card = '', newCardInfo.password = '', newCardInfo.phone_num = '',newCardVisible = true">
         <el-icon style="height: 50px; width: 50px;">
           <Plus style="height: 100%; width: 100%;" />
         </el-icon>
-      </el-button>
+      </el-button>-->
 
-      <!-- 新建借书证对话框 -->
-      <el-dialog v-model="newCardVisible" title="绑定新账户" width="30%" align-center>
+      <!-- 绑定新账户对话框 -->
+<!--      <el-dialog v-model="newCardVisible" title="绑定新账户" width="30%" align-center>
         <div style="margin-left: 2vw; font-weight: bold; font-size: 1rem; margin-top: 20px; ">
           卡号：
           <el-input v-model="newCardInfo.account_id" style="width: 12.5vw;" clearable />
@@ -83,7 +80,7 @@
                                :disabled="newCardInfo.identity_card.length === 0 || newCardInfo.phone_num.length === 0 || newCardInfo.account_id.length === 0 || newCardInfo.password.length === 0">确定</el-button>
                 </span>
         </template>
-      </el-dialog>
+      </el-dialog>-->
 
 
       <!-- 挂失账户对话框 -->
@@ -178,7 +175,7 @@ export default{
     }
   },
   methods: {
-    ConfirmNewCard(){
+    /*ConfirmNewCard(){
       // 发出POST请求
       axios.post("http://127.0.0.1:8000/user/bind_card",
           { // 请求体
@@ -195,7 +192,7 @@ export default{
           }).catch(error=>{
             ElMessage.error(error.response.data.error);
       })
-    },
+    },*/
     ReportLostCard(){
       axios.post("http://127.0.0.1:8000/user/card_lost/",
           { // 请求体
@@ -205,7 +202,8 @@ export default{
           })
           .then(response => {
             ElMessage.success("操作成功") // 显示消息提醒
-            this.newCardVisible = false // 将对话框设置为不可见
+            this.reportLostVisible = false // 将对话框设置为不可见
+            this.toReportLost.password = "" // 清空密码
             this.QueryCards() // 重新查询借书证以刷新页面
           }).catch(error=>{
         ElMessage.error(error.response.data.error);

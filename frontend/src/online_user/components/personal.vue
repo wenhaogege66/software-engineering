@@ -16,27 +16,23 @@
             <div style = "margin-left: 3vw; font-weight: bold; font-size: 1rem; margin-top: 5px;">
               密码修改
             </div>
-            <div style="height: 25px"></div>
-            <div style = "margin-left: 3vw; font-weight: bold; font-size: 1rem; margin-top: 5px;">
+            <el-divider />
+            <div style = "margin-left: 4.3vw; font-weight: bold; font-size: 1rem; margin-top: 5px;">
               手机号：
               <el-input v-model="phone" style="width: 12.5vw; margin-left: 1rem" maxlength="18" clearable/>
             </div>
-            <div style="height: 25px"></div>
             <div style = "margin-left: 4.3vw; font-weight: bold; font-size: 1rem; margin-top: 5px;">
               身份证号：
               <el-input v-model="IDCard" style="width: 12.5vw; margin-left: 1rem" type="password" maxlength="20" clearable/>
             </div>
-            <div style="height: 25px"></div>
             <div style = "margin-left: 4.3vw; font-weight: bold; font-size: 1rem; margin-top: 5px;">
               用户名：
               <el-input v-model="account" style="width: 12.5vw; margin-left: 1rem" type="password" maxlength="20" clearable/>
             </div>
-            <div style="height: 25px"></div>
             <div style = "margin-left: 4.3vw; font-weight: bold; font-size: 1rem; margin-top: 5px;">
               新密码：
               <el-input v-model="new_password" style="width: 12.5vw; margin-left: 1rem" type="password" maxlength="20" clearable/>
             </div>
-            <div style="height: 40px"></div>
           </div>
           <!-- 卡片操作 -->
           <div style="margin-top: 10px; display:flex; margin-left: 10rem;">

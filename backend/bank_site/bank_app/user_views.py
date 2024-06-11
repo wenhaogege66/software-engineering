@@ -26,7 +26,6 @@ def get_user_info(request):
         return JsonResponse({"error": "Method not allowed"}, status=405)
 
 
-
 def list_cards(request):
     # user_id -> List[Card]
     if request.method == 'GET':
@@ -48,30 +47,23 @@ def list_cards(request):
         return JsonResponse({"error": "Method not allowed"}, status=405)
 
 
-@csrf_exempt
-def bind_card(request):
-    if request.method == 'POST':
-        data = json.loads(request.body.decode('utf-8'))
-        print(f'获取到的post数据为：{data}')
-        filter_accounts = account.objects.filter(account_id=data.get('account_id'))
-        filter_users = online_user.objects.filter(user_id=data.get('user_id'))
-        if filter_accounts.exists() and filter_users.exists():
-            if (filter_accounts[0].password == data.get('password')
-                    and filter_users[0].identity_card == data.get('identity_card'))\
-                    and filter_users[0].phone_num == data.get('phone_num'):
-                if filter_accounts[0].is_lost:
-                    return JsonResponse({"error": "The card has been lost", 'state': False}, status=400)
-                filter_accounts.update(identity_card=data.get('identity_card'))
-                return_data = {"success": "The binding is successful", 'state': True}
-                return JsonResponse(return_data, status=200)
-            else:
-                return JsonResponse({"error": "Password is Wrong", 'state': False}, status=400)
-        else:
-            return JsonResponse({"error": "Account not found or User not Found", 'state': False}, status=400)
-    elif request.method == 'OPTION':
-        return JsonResponse({"success": "OPTION operation"}, status=200)
-    else:
-        return JsonResponse({"error": "Method not allowed", 'state': True}, status=405)
+# @csrf_exempt
+# def bind_cards(request):
+#     if request.method == 'POST':
+#         data = json.loads(request.body.decode('utf-8'))
+#         print(f'获取到的post数据为：{data}')
+#         filter_accounts = account.objects.filter(identity_card=data.get('identity_card'), phone_num=data.get('phone_num'))
+#         filter_users = online_user.objects.filter(identity_card=data.get('identity_card'), phone_num=data.get('phone_num'))
+#         if filter_accounts.exists() and filter_users.exists():
+#             filter_accounts.update(user_id=filter_users[0].user_id)
+#             return_data = {"success": "The auto-binding is successful", 'state': True}
+#             return JsonResponse(return_data, status=200)
+#         else:
+#             return JsonResponse({"success": "No accounts now for this user", 'state': False}, status=200)
+#     elif request.method == 'OPTION':
+#         return JsonResponse({"success": "OPTION operation"}, status=200)
+#     else:
+#         return JsonResponse({"error": "Method not allowed", 'state': True}, status=405)
 
 
 @csrf_exempt
@@ -121,8 +113,8 @@ def user_add(request):
         print('看看data:{}'.format(data))
         filter_online_user = online_user.objects.filter(identity_card=data.get('identity_card'))
         # print('看看filter_online_user:{}'.format(filter_online_user))
-        if (not filter_online_user.exists()):
-            if(online_user.objects.count == 0):
+        if not filter_online_user.exists():
+            if online_user.objects.count == 0:
                 cur_id = 1
                 new_user = online_user(
                     user_id = cur_id,
@@ -144,9 +136,18 @@ def user_add(request):
                     is_lost=False
                 )
                 new_user.save()
-            # print(new_user)
-            return_data = {'state': True}
-            return JsonResponse(return_data, status=200)
+            # 注册成功后自动开始相关联的卡片（账户绑定）
+            filter_accounts = account.objects.filter(identity_card=data.get('identity_card'), phone_num=data.get('phone_num'))
+            print(f"看看这个{filter_accounts}")
+            if filter_accounts.exists():
+                filter_accounts.update(user_id=new_user.user_id)
+                return_data = {"success": "The auto-binding is successful", 'state': True}
+                return JsonResponse(return_data, status=200)
+            else:
+                return JsonResponse({"success": "No accounts now for this user", 'state': True}, status=200)
+        # # print(new_user)
+            # return_data = {'state': True}
+            # return JsonResponse(return_data, status=200)
         else:
             return JsonResponse({"error": "User with this identity_card has been exist",'state': False}, status=403)
     elif request.method == 'OPTION':
@@ -164,8 +165,12 @@ def user_log_in(request):
         filter_online_user = online_user.objects.filter(user_name=data.get('user_name'))
         # print('看看filter_online_user:{}'.format(filter_online_user))
         if filter_online_user.exists():
+            if filter_online_user[0].is_blacklisted:
+                return JsonResponse({"error": "this user is blacklisted", 'state': False}, status=400)
+            if filter_online_user[0].is_frozen:
+                return JsonResponse({"error": "this user is frozen", 'state': False}, status=400)
             # 用户存在开始对照密码
-            cur_user =  online_user.objects.get(user_name = data.get('user_name'))
+            cur_user = online_user.objects.get(user_name = data.get('user_name'))
             print(f"文豪说看看这个密码: {cur_user.password}")
             if data.get('password') == cur_user.password:
                 return_data = {'user_id': cur_user.user_id, 'state': True}
@@ -214,35 +219,46 @@ def user_account_all_records(request):
             # print("Invalid account_id")
             return JsonResponse({"error": "查询的账户不存在"}, status=403)
         else:
-            result = []
-            queryset = []
-            filter_deposit_records = deposit_record.objects.filter(account_id=int(request.GET.get('account_id')))
-            if filter_deposit_records.exists():
-                queryset.extend(filter_deposit_records)
-                queryset = queryset.sort(key=lambda x: x.deposit_start_date)
-                result.append({"deposit": queryset})
+            records = []
+            record_type = int(request.GET.get('record_type'))
+            if record_type == 1:
+                filter_deposit_records = deposit_record.objects.filter(account_id=int(request.GET.get('account_id')))
+                if filter_deposit_records.exists():
+                    records =[{
+                        "deposit_record_id": record.deposit_record_id,
+                        "account_id": record.account_id,
+                        "deposit_type": record.deposit_type,
+                        "auto_renew_status": record.auto_renew_status,
+                        "deposit_start_date": record.deposit_start_date,
+                        "deposit_end_date": record.deposit_end_date,
+                        "deposit_amount": record.deposit_amount,
+                        "cashier_id": record.cashier_id,
+                    } for record in filter_deposit_records]
+            elif record_type == 2:
+                filter_withdrawal_records = withdrawal_record.objects.filter(account_id=int(request.GET.get('account_id')))
+                if filter_withdrawal_records.exists():
+                    records = [{
+                        "withdrawal_record_id": record.withdrawal_record_id,
+                        "account_id": record.account_id,
+                        "withdrawal_date": record.withdrawal_date,
+                        "withdrawal_amount": record.withdrawal_amount,
+                        "cashier_id": record.cashier_id,
+                    } for record in filter_withdrawal_records]
+            elif record_type == 3:
+                filter_transfer_records = transfer_record.objects.filter(account_out_id=int(request.GET.get('account_id')))
+                if filter_transfer_records.exists():
+                    records = [{
+                        "transfer_record_id": record.transfer_record_id,
+                        "account_in_id": record.account_in_id,
+                        "account_out_id": record.account_out_id,
+                        "transfer_date": record.transfer_date,
+                        "transfer_amount": record.transfer_amount,
+                        "cashier_id": record.cashier_id,
+                    } for record in filter_transfer_records]
             else:
-                result.append({"deposit": []})
-            queryset = []
-
-            filter_withdrawal_records = withdrawal_record.objects.filter(account_id=int(request.GET.get('account_id')))
-            if filter_withdrawal_records.exists():
-                queryset = []
-                queryset.extend(filter_withdrawal_records)
-                queryset = queryset.sort(key=lambda x: x.withdrawal_date)
-                result.append({"withdrawal": queryset})
-            else:
-                result.append({"withdrawal": []})
-            queryset = []
-            filter_transfer_records = transfer_record.objects.filter(account_in_id=int(request.GET.get('account_id')))
-            if filter_transfer_records.exists():
-                queryset = []
-                queryset.extend(filter_transfer_records)
-                queryset = queryset.sort(key=lambda x: x.transfer_date)
-                result.append({"transfer": queryset})
-            else:
-                result.append({"transfer": []})
-            return JsonResponse(result, safe=False, status=200)
+                return JsonResponse({"error":"Wrong record type"},status=400)
+            print(f"look records: {records}")
+            return JsonResponse(records, safe=False, status=200)
     else:
         return JsonResponse({"error": "Method not allowed"}, status=405)
 
@@ -259,15 +275,15 @@ def user_account_transfer(request):
         if not filter_in_account.exists():
             return JsonResponse({"error": "接收转账用户不存在"}, status=403)
         if not filter_out_account.exists():
-            return JsonResponse({"error": "存款不足"}, status=403)
+            return JsonResponse({"error": "转出账户不存在或密码错误"}, status=403)
         filter_in_account = filter_in_account.first()
         filter_out_account = filter_out_account.first()
         if filter_out_account.is_frozen or filter_out_account.is_lost:
-            return JsonResponse({"error": "转出账户挂失/冻结"}, status=403)
+            return JsonResponse({"error": "转出账户被挂失/冻结"}, status=403)
         if filter_in_account.is_frozen or filter_in_account.is_lost:
-            return JsonResponse({"error": "转入账户挂失/冻结"}, status=403)
+            return JsonResponse({"error": "转入账户被挂失/冻结"}, status=403)
         # 判断用户存款是否满足取出条件
-        if filter_out_account.uncredited_deposit >= data.get('transfer_amount'):
+        if filter_out_account.uncredited_deposit >= float(data.get('transfer_amount')):
             # 更新用户存款情况
             filter_out_account.uncredited_deposit -= data.get('transfer_amount')
             filter_out_account.balance -= data.get('transfer_amount')
@@ -283,11 +299,12 @@ def user_account_transfer(request):
                 transfer_date=datetime.datetime.now(),
                 # -----
                 transfer_amount=data.get('transfer_amount'),
+                cashier_id=0 # 0 作为默认互联网转账的cashier_id
             )
             new_transfer_record.save()
             return JsonResponse({"success": "successful operation"}, status=200)
         else:
-            return JsonResponse({"error": "转账用户不存在"}, status=403)
+            return JsonResponse({"error": "转出账户余额不足"}, status=403)
     elif request.method == 'OPTION':
         return JsonResponse({"success": "OPTION operation"}, status=200)
     else:

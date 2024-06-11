@@ -4,13 +4,13 @@ from django.db import models
 
 
 class employee(models.Model):
-    employee_id = models.AutoField(primary_key = True)
-    employee_name = models.CharField(max_length = 20, null = False, default = "Unknown")
-    identity_card = models.CharField(max_length = 18, null = False, default = "Unknown")
-    employee_sex = models.IntegerField(null = False, default = 0)
-    phone_number = models.CharField(max_length = 20, null = False, default = "Unknown")
-    occupation_name = models.CharField(max_length = 50, null = False, default = "Unknown")
-    is_employeed = models.BooleanField(null = False, default = "False")
+    employee_id = models.AutoField(primary_key=True)
+    employee_name = models.CharField(max_length=20, null = False, default = "Unknown")
+    identity_card = models.CharField(max_length=18, null = False, default = "Unknown")
+    employee_sex = models.IntegerField(null=False, default = 0)
+    phone_number = models.CharField(max_length=20, null = False, default = "Unknown")
+    occupation_name = models.CharField(max_length=50, null = False, default = "Unknown")
+    is_employeed = models.BooleanField(null=False, default = "False")
     other_information = models.CharField(max_length = 1021, default = "Unknown")
 
 
@@ -54,7 +54,9 @@ class account(models.Model):
     objects = models.Manager()
     account_id = models.AutoField(primary_key=True)
     password = models.CharField(max_length=20, null=False)
-    identity_card = models.ForeignKey(online_user, on_delete=models.PROTECT, related_name="accounts")
+    user_id = models.ForeignKey(online_user, on_delete=models.SET_NULL, related_name="accounts", null=True)
+    identity_card = models.CharField(max_length=18, null=False)
+    phone_num = models.CharField(max_length=20, null=False,default = "10086")
     card_type = models.IntegerField(null=False)
     balance = models.FloatField(null=False, default=0.0)
     current_deposit = models.FloatField(null=False, default=0.0)
