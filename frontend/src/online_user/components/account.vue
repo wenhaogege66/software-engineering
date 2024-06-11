@@ -238,7 +238,7 @@ export default{
     }
   },
   mounted() {
-    this.user_id = 1;//this.$route.query.user_id;
+    this.user_id = this.$route.query.user_id;
     this.QueryCards();
     this.GetInfo();
   }
