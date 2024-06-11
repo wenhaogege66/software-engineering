@@ -98,6 +98,6 @@ class transfer_record(models.Model):
 
 class BlackList(models.Model):
     list_id = models.AutoField(primary_key = True)
-    manager_id = models.ForeignKey(online_bank_manager, on_delete=models.CASCADE,default=1)
-    user_id = models.ForeignKey(online_user, on_delete=models.CASCADE)
+    online_bank_manager_id = models.ForeignKey(online_bank_manager, on_delete=models.CASCADE,default=1,db_column='online_bank_manager_id')
+    user_id = models.ForeignKey(online_user, on_delete=models.CASCADE,db_column='user_id')
     timestamp = models.DateTimeField(auto_now_add=True)

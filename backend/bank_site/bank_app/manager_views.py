@@ -43,14 +43,6 @@ def online_manager_log_in(request):
     else:
         return JsonResponse({"error": "Method not allowed",'state': True}, status=405)
 
-
-def query_blacklist(request, manager_id):
-    admin = get_object_or_404(online_bank_manager, online_bank_manager_id=manager_id)
-    blacklisted_users = BlackList.objects.filter(admin=admin).values('user_id', 'user__user_name')
-    print(f"文豪说看看这个密码: {blacklisted_users}")
-    return JsonResponse(list(blacklisted_users), safe=False)
-
-
 @csrf_exempt
 def blacklist_account_add(request):
     # print("文豪说看看这个密码")
@@ -73,8 +65,9 @@ def blacklist_account_add(request):
                 if cur_user.is_blacklisted == False:
                     if not BlackList.objects.filter(user_id=cur_user.user_id).exists():
                         print("我日了个蛋")
-                        BlackList.objects.create(user_id=cur_user.user_id)
-                        cur_user.update(is_blacklisted=True)
+                        cur_black = BlackList(user_id=cur_user, online_bank_manager_id=cur_manager)
+                        cur_black.save()
+                        cur_user.is_blacklisted=True
                         cur_user.save()
                     return_data = {'state': True}
                     return JsonResponse(return_data, status=200)
@@ -90,16 +83,99 @@ def blacklist_account_add(request):
         return JsonResponse({"success": "OPTION operation"}, status=200)
     else:
         return JsonResponse({"error": "Method not allowed",'state': True}, status=405)
+    
+@csrf_exempt
+def user_frozen(request):
+    # print("文豪说看看这个密码")
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        print('看看data:{}'.format(data))
+        filter_online_user = online_user.objects.filter(user_id=data.get('user_id'))
+        # print('看看filter_online_manager:{}'.format(filter_online_manager.account))
+        if filter_online_user.exists():
+            cur_user =  online_user.objects.get(user_id=data.get('user_id'))
+            filter_online_user = online_user.objects.filter(user_name=data.get('user_name'))            
+            print('看看filter_online_user:{}'.format(cur_user.user_name))
+            if cur_user.is_frozen == False:
+                cur_user.is_frozen=True
+                cur_user.save()
+                return_data = {'state': True}
+                return JsonResponse(return_data, status=200)
+            else:
+                return JsonResponse({"error": "已经冻结了，宝贝",'state': False}, status=403)
+        else:
+            return JsonResponse({"error": "User don't exist",'state': False}, status=403)
+    elif request.method == 'OPTION':
+        return JsonResponse({"success": "OPTION operation"}, status=200)
+    else:
+        return JsonResponse({"error": "Method not allowed",'state': True}, status=405)
+    
+@csrf_exempt
+def blacklist_account_delet(request):
+    # print("文豪说看看这个密码")
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        print('看看data:{}'.format(data))
+        filter_online_user = online_user.objects.filter(user_id=data.get('user_id'))
+        # print('看看filter_online_manager:{}'.format(filter_online_manager.account))
+        if filter_online_user.exists():
+            # 用户存在开始对照密码
+            cur_user =  online_user.objects.get(user_id=data.get('user_id'))
+            filter_online_user = online_user.objects.filter(user_name=data.get('user_name'))            
+            print('看看filter_online_user:{}'.format(cur_user.user_name))
+            if cur_user.is_blacklisted == True:
+                if  BlackList.objects.filter(user_id=cur_user.user_id).exists():
+                    cur_black = BlackList.objects.get(user_id=cur_user)
+                    cur_black.delete()
+                    cur_user.is_blacklisted=False
+                    cur_user.save()
+                return_data = {'state': True}
+                return JsonResponse(return_data, status=200)
+            else:
+                return JsonResponse({"error": "Blacklist don't exist",'state': False}, status=403)
+        else:
+            return JsonResponse({"error": "User don't exist",'state': False}, status=403)
+    elif request.method == 'OPTION':
+        return JsonResponse({"success": "OPTION operation"}, status=200)
+    else:
+        return JsonResponse({"error": "Method not allowed",'state': True}, status=405)
+    
+    
+def blacklist_account_query(request):
+    if request.method == 'GET':
+        filter_blacks = online_user.objects.filter(is_blacklisted = True)
+        # if filter_users.exists():
+        #     filter_user = filter_users[0]
+        # else:
+        #     return JsonResponse({"error": "User not found"}, status=404)
+        # filter_cards = filter_user.accounts.all()
+        results = [{
+            "user_name": black.user_name,
+            "phone_num": black.phone_num,
+            "id_card": black.identity_card,
+            "user_id": black.user_id,
+        } for black in filter_blacks]
+        # for res in results:
+        #     print(res)
+        return JsonResponse(results, status=200,safe=False)
+    else:
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+    
+def user_data_query(request):
+    if request.method == 'GET':
+        filter_blacks = online_user.objects.all()
+        results = [{
+            "user_name": black.user_name,
+            "phone_num": black.phone_num,
+            "id_card": black.identity_card,
+            "user_id": black.user_id,
+        } for black in filter_blacks]
+        # for res in results:
+        #     print(res)
+        return JsonResponse(results, status=200,safe=False)
+    else:
+        return JsonResponse({"error": "Method not allowed"}, status=405)
 
-# def blacklist_account(request, manager_id, user_name):
-#     admin = get_object_or_404(online_bank_manager, online_bank_manager_id=manager_id)
-#     user = get_object_or_404(online_user, user_id=user_id)
-
-#     if not BlackList.objects.filter(admin=admin, user=user).exists():
-#         BlackList.objects.create(admin=admin, user=user)
-#         user.is_blacklisted = True
-#         user.save()
-#     return JsonResponse({'status': 'success'})
 
 
 def cancel_black_account(request, sys_manager_id, user_id):

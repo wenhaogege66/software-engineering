@@ -10,20 +10,24 @@
     >
       黑名单管理
     </div>
-    <div style="width: 45%; margin: 0 auto; padding-top: 5vh">
+    <div style="width: 45%; margin-left: 10%; padding-top: 5vh">
       <el-button type="primary" @click="() => (DepositVisible = true)"
         >添加黑名单</el-button
       >
     </div>
-    <el-table :data="tableData" style="width: 70%; margin-left: 15%">
-      <el-table-column fixed prop="date" label="用户名" width="300" />
-      <el-table-column prop="name" label="手机号" width="300" />
-      <el-table-column prop="state" label="身份证号" width="300" />
-      <el-table-column fixed="right" label="Operations" width="150">
-        <template #default>
-          <el-button link type="primary" size="small" @click="handleClick">
-            移除
-          </el-button>
+    <el-table :data="blacks" style="width: 80%; margin-left: 10%">
+      <el-table-column fixed prop="user_name" label="用户名" width="250" />
+      <el-table-column prop="phone_num" label="手机号" width="250" />
+      <el-table-column prop="id_card" label="身份证号" width="250" />
+      <el-table-column fixed="right" label="Operations" width="250">
+        <template #default="scope">
+          <el-button
+            link
+            type="danger"
+            size="large"
+            @click="(DeletVisible = true), (delet_user_id = scope.row.user_id)"
+            >Remove</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
@@ -60,7 +64,7 @@
       >
         管理员账号：
         <el-input
-          v-model="newBlack_user_name"
+          v-model="newBlack_manager_name"
           style="width: 12.5vw"
           clearable
         />
@@ -68,7 +72,21 @@
 
       <template #footer>
         <span>
-          <el-button @click="DepositVisible = false">确认</el-button>
+          <el-button @click="AddBlack()">确认</el-button>
+        </span>
+      </template>
+    </el-dialog>
+
+    <el-dialog
+      v-model="DeletVisible"
+      title="移除黑名单"
+      width="30%"
+      align-center
+      :before-close="handleClose"
+    >
+      <template #footer>
+        <span>
+          <el-button type="danger" @click="DeletBlack()">确认移除</el-button>
         </span>
       </template>
     </el-dialog>
@@ -77,19 +95,72 @@
 
 <script>
 import { ref } from "vue";
+import axios from "axios";
+import { ElMessage } from "element-plus";
 
 export default {
   data() {
     return {
       newBlack_user_name: "",
+      newBlack_manager_name: "",
       BlackInfo: {},
+      blacks: [],
       DepositVisible: false,
+      DeletVisible: false,
+      delet_user_id: 0,
     };
   },
-};
-
-const handleClick = () => {
-  console.log("click");
+  methods: {
+    async QueryBlack() {
+      let response = await axios.get("/manager/blacklist_query/"); // 向/book发出GET请求s
+      this.blacks = []; // 清空列表
+      let blacks = response.data; // 接收响应负载
+      blacks.forEach((black) => {
+        this.blacks.push(black);
+      });
+      console.log("获取黑名单成功：", blacks);
+    },
+    async AddBlack() {
+      this.DepositVisible = false;
+      axios
+        .post("/manager/blacklist_add/", {
+          manager_name: this.newBlack_manager_name,
+          user_name: this.newBlack_user_name,
+        })
+        .then((response) => {
+          console.log(response);
+          ElMessage.success("新增黑名单成功"); // 显示消息提醒
+          this.QueryBlack();
+        })
+        .catch((error) => {
+          console.log("有错误");
+          ElMessage.error(error.response.data.error);
+          this.password = "";
+        });
+    },
+    async DeletBlack() {
+      this.DeletVisible = false;
+      console.log("删除", this.delet_user_id);
+      axios
+        .post("/manager/blacklist_delet/", {
+          user_id: this.delet_user_id,
+        })
+        .then((response) => {
+          console.log(response);
+          ElMessage.success("删除成功"); // 显示消息提醒
+          this.QueryBlack();
+        })
+        .catch((error) => {
+          // console.log("有错误");
+          ElMessage.error(error.response.data.error);
+          this.password = "";
+        });
+    },
+  },
+  mounted() {
+    // console.log("首次开始获取数据");
+    this.QueryBlack(); // 查询借书证
+  },
 };
 </script>
   

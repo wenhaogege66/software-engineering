@@ -2,8 +2,10 @@ from django.urls import path
 from . import manager_views
 
 urlpatterns = [
-    path('query_blacklist/<int:sys_manager_id>/', manager_views.query_blacklist, name='query_blacklist'),
     path('sign_in/', manager_views.online_manager_log_in),
+    path('user_frozen/', manager_views.user_frozen),
     path('blacklist_add/', manager_views.blacklist_account_add),
-    path('cancel_black_account/<int:sys_manager_id>/<int:user_id>/', manager_views.cancel_black_account, name='cancel_black_account'),
+    path('blacklist_query/', manager_views.blacklist_account_query),
+    path('user_data_query/', manager_views.user_data_query),
+    path('blacklist_delet/', manager_views.blacklist_account_delet),
 ]

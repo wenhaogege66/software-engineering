@@ -171,7 +171,7 @@ export default {
       }
     },
     getOnlineUserAdministratorID() {
-      console.log(666);
+      // console.log(666);
       axios
         .post("/manager/sign_in/", {
           account: this.account,
@@ -180,13 +180,14 @@ export default {
         .then((response) => {
           console.log(444);
 
-          console.log(response);
-          this.manager.id = response.data.id;
+          console.log(response.data.id);
+          this.employee.id = response.data.id;
+          // console.log(this.employee.id);
           window.location.href =
             "/online_manager?managerID=" + this.employee.id; // 函数内部进行超链接跳转/
         })
         .catch((error) => {
-          console.log(555);
+          console.log("有错误");
           ElMessage.error(error.response.data.error);
           this.password = "";
         });
