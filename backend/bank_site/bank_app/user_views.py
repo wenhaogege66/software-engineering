@@ -10,6 +10,23 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core import serializers
 
 
+def get_user_info(request):
+    if request.method == 'GET':
+        filter_users = online_user.objects.filter(user_id=request.GET.get('user_id'))
+        if filter_users.exists():
+            filter_user = filter_users[0]
+        else:
+            return JsonResponse({"error": "User not found"}, status=404)
+        result = {
+            "user_name": filter_user.user_name,
+            "phone_num": filter_user.phone_num
+        }
+        return JsonResponse(result, safe=False)
+    else:
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+
+
+
 def list_cards(request):
     # user_id -> List[Card]
     if request.method == 'GET':
@@ -18,9 +35,7 @@ def list_cards(request):
             filter_user = filter_users[0]
         else:
             return JsonResponse({"error": "User not found"}, status=404)
-        user_idcard = filter_user.identity_card
-        print(f'用户的身份证号码为：{user_idcard}')
-        filter_cards = account.objects.filter(identity_card=user_idcard)
+        filter_cards = filter_user.accounts.all()
         results = [{
             "account_id": card.account_id,
             "card_type": card.card_type,
@@ -41,14 +56,18 @@ def bind_card(request):
         filter_accounts = account.objects.filter(account_id=data.get('account_id'))
         filter_users = online_user.objects.filter(user_id=data.get('user_id'))
         if filter_accounts.exists() and filter_users.exists():
-            if filter_accounts[0].password == data.get('password') and filter_users[0].identity_card == data.get('identity_card'):
+            if (filter_accounts[0].password == data.get('password')
+                    and filter_users[0].identity_card == data.get('identity_card'))\
+                    and filter_users[0].phone_num == data.get('phone_num'):
                 if filter_accounts[0].is_lost:
-                    return JsonResponse({"error": "The card has been lost", 'state': False}, status=200)
+                    return JsonResponse({"error": "The card has been lost", 'state': False}, status=400)
                 filter_accounts.update(identity_card=data.get('identity_card'))
-                return_data = {'state': True}
+                return_data = {"success": "The binding is successful", 'state': True}
                 return JsonResponse(return_data, status=200)
             else:
-                return JsonResponse({"error": "Password is Wrong", 'state': False}, status=200)
+                return JsonResponse({"error": "Password is Wrong", 'state': False}, status=400)
+        else:
+            return JsonResponse({"error": "Account not found or User not Found", 'state': False}, status=400)
     elif request.method == 'OPTION':
         return JsonResponse({"success": "OPTION operation"}, status=200)
     else:
@@ -62,18 +81,19 @@ def card_lost(request):
         filter_users = account.objects.filter(user_id=data.get('user_id'))
         if not filter_users.exists():
             return JsonResponse({"error": "User not found", 'state': False}, status=404)
-        filter_accounts = account.objects.filter(account_id=data.get('account_id'), identity_card=filter_users[0].identity_card)
+        filter_accounts = filter_users.accounts.all()
         # print(f'获取到的post数据为：{data}')
         # print(f'获取到的filter_accounts数据为：{filter_accounts[0].password}{filter_accounts[0].identity_card.identity_card}')
         if filter_accounts.exists():
-            if filter_accounts[0].password == data.get('password'):
-                if filter_accounts[0].is_lost:
-                    return JsonResponse({"error": "The card has been lost", 'state': False}, status=200)
-                filter_accounts.update(is_lost=True)
+            lost_account = filter_accounts.filter(account_id=data.get('account_id'))
+            if lost_account.password == data.get('password'):
+                if lost_account.is_lost:
+                    return JsonResponse({"error": "The card has been lost", 'state': False}, status=400)
+                lost_account.update(is_lost=True)
                 return_data = {'state': True}
                 return JsonResponse(return_data, status=200)
             else:
-                return JsonResponse({"error": "Password is Wrong", 'state': False}, status=200)
+                return JsonResponse({"error": "Password is Wrong", 'state': False}, status=400)
         else:
             return JsonResponse({"error": "Card not found", 'state': False}, status=404)
     elif request.method == 'OPTION':
@@ -81,23 +101,24 @@ def card_lost(request):
     else:
         return JsonResponse({"error": "Method not allowed", 'state': True}, status=405)
 
+#
+# def online_bank_query_accounts(request):
+#     if request.method == 'GET':
+#         filter_accounts = account.objects.filter(account_id=request.GET.get('accountID'))[0]
+#         account_data = {}
+#         account_data['id'] = filter_accounts.account_id
+#         account_data['password'] = filter_accounts.password
+#         account_data['identity_card'] = filter_accounts.identity_card.identity_card
+#         account_data['balance'] = filter_accounts.balance
+#         account_data['currentDeposit'] = filter_accounts.current_deposit
+#         account_data['uncreditedDeposit'] = filter_accounts.uncredited_deposit
+#         account_data['isFrozen'] = filter_accounts.is_frozen
+#         account_data['isLost'] = filter_accounts.is_lost
+#         return JsonResponse(account_data, safe=False)
+#     else:
+#         return JsonResponse({"error": "Method not allowed"}, status=405)
 
-def online_bank_query_accounts(request):
-    if request.method == 'GET':
-        filter_accounts = account.objects.filter(account_id=request.GET.get('accountID'))[0]
-        account_data = {}
-        account_data['id'] = filter_accounts.account_id
-        account_data['password'] = filter_accounts.password
-        account_data['identity_card'] = filter_accounts.identity_card.identity_card
-        account_data['balance'] = filter_accounts.balance
-        account_data['currentDeposit'] = filter_accounts.current_deposit
-        account_data['uncreditedDeposit'] = filter_accounts.uncredited_deposit
-        account_data['isFrozen'] = filter_accounts.is_frozen
-        account_data['isLost'] = filter_accounts.is_lost
-        return JsonResponse(account_data, safe=False)
-    else:
-        return JsonResponse({"error": "Method not allowed"}, status=405)
-    
+
 @csrf_exempt
 def user_add(request):
     if request.method == 'POST':
@@ -138,7 +159,8 @@ def user_add(request):
         return JsonResponse({"success": "OPTION operation"}, status=200)
     else:
         return JsonResponse({"error": "Method not allowed",'state': True}, status=405)
-    
+
+
 @csrf_exempt
 def user_log_in(request):
     if request.method == 'POST':

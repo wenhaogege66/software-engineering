@@ -10,8 +10,8 @@ urlpatterns = [
     path('list_cards/', user_views.list_cards),
     path('bind_card', user_views.bind_card),
     path('card_lost/', user_views.card_lost),
+    path('user_info/',user_views.get_user_info),
     path('money_transfer/', user_views.user_account_transfer),
     path('list_records/', user_views.user_account_all_records),
-    path('queryAccount/', user_views.online_bank_query_accounts),
 ]
 

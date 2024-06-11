@@ -24,59 +24,81 @@
             互联网个人银行
           </div>
 
-          <el-menu-item index="/online_user/home">
-            <el-icon>
-              <Avatar />
-            </el-icon>
-            <span>首页</span>
-          </el-menu-item>
-          <el-menu-item index="/online_user/personal">
-            <el-icon>
-              <User />
-            </el-icon>
-            <span>密码修改</span>
-          </el-menu-item>
-          <el-menu-item index="/online_user/account">
-            <el-icon>
-              <User />
-            </el-icon>
-            <span>账户信息</span>
-          </el-menu-item>
-          <!-- <el-menu-item index="/online_user/record">
-            <el-icon>
-              <User />
-            </el-icon>
-            <span>交易记录</span>
-          </el-menu-item> -->
-          <div style="height: 30px"></div>
-        </el-menu>
-      </el-aside>
-      <el-container>
-        <el-header style="height: 0vh"></el-header>
-        <el-main style="height: 100%; width: 100%">
-          <el-scrollbar height="100%">
-            <RouterView
-              class="content"
-              style="
-                height: 100vh;
-                max-height: 100%;
-                background-color: white;
-                color: black;
-              "
-            />
-          </el-scrollbar>
-        </el-main>
+            <el-menu-item v-model:index="index.home">
+              <el-icon>
+                <Avatar />
+              </el-icon>
+              <span>首页</span>
+            </el-menu-item>
+            <el-menu-item v-model:index="index.personal">
+              <el-icon>
+                <User />
+              </el-icon>
+              <span>密码修改</span>
+            </el-menu-item>
+            <el-menu-item v-model:index="index.account">
+              <el-icon>
+                <User />
+              </el-icon>
+              <span>用户信息</span>
+            </el-menu-item>
+            <el-menu-item v-model:index="index.record">
+              <el-icon>
+                <User />
+              </el-icon>
+              <span>交易记录</span>
+            </el-menu-item>
+            <div style="height: 30px"></div>
+  <!--          <a href="/" style="margin-left: 40px;">-->
+  <!--            <el-button type="danger">-->
+  <!--              退出-->
+  <!--            </el-button>-->
+  <!--          </a>-->
+          </el-menu>
+  
+        </el-aside>
+        <el-container>
+          <el-header style="height: 0vh;"></el-header>
+          <el-main style="height: 100%; width: 100%; ">
+            <el-scrollbar height="100%">
+              <RouterView class="content" style="height: 100vh; max-height: 100%; background-color: white; color: black;" />
+            </el-scrollbar>
+          </el-main>
+        </el-container>
       </el-container>
-    </el-container>
-  </div>
-</template>
-  
+    </div>
+  </template>
+
   <script>
-export default {
-  methods: {},
-};
-</script>
-  
+  export default {
+
+    data() {
+      return {
+        user_id:null,
+        index:{
+          home: "/online_user/home" + "?user_id=" + this.user_id,
+          personal: "/online_user/personal" + "?user_id=" + this.user_id,
+          account: "/online_user/account" + "?user_id=" + this.user_id,
+          record: "/online_user/record" + "?user_id=" + this.user_id,
+        }
+      }
+    },
+    methods: {
+    },
+    mounted() { // 当页面被渲染时
+      // 获取 URL 中的查询字符串
+      let search = window.location.search;
+      if(search!==undefined)
+      {
+        let urlParams = new URLSearchParams(search);
+        let obj = JSON.parse(urlParams.get('user_id'));
+        this.user_id = obj;
+        console.log(this.user_id);
+      }
+    }
+  }
+  </script>
+
   <style scoped>
 #app {
   position: absolute;
