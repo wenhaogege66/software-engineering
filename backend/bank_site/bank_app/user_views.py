@@ -78,24 +78,18 @@ def bind_card(request):
 def card_lost(request):
     if request.method == 'POST':
         data = json.loads(request.body.decode('utf-8'))
-        filter_users = account.objects.filter(user_id=data.get('user_id'))
-        if not filter_users.exists():
-            return JsonResponse({"error": "User not found", 'state': False}, status=404)
-        filter_accounts = filter_users.accounts.all()
-        # print(f'获取到的post数据为：{data}')
-        # print(f'获取到的filter_accounts数据为：{filter_accounts[0].password}{filter_accounts[0].identity_card.identity_card}')
-        if filter_accounts.exists():
-            lost_account = filter_accounts.filter(account_id=data.get('account_id'))
-            if lost_account.password == data.get('password'):
-                if lost_account.is_lost:
-                    return JsonResponse({"error": "The card has been lost", 'state': False}, status=400)
-                lost_account.update(is_lost=True)
-                return_data = {'state': True}
-                return JsonResponse(return_data, status=200)
-            else:
-                return JsonResponse({"error": "Password is Wrong", 'state': False}, status=400)
+        lost_accounts = account.objects.filter(account_id=data.get('account_id'))
+        if not lost_accounts.exists():
+            return JsonResponse({"error": "Account not found", 'state': False}, status=400)
+        lost_account = lost_accounts[0]
+        if lost_account.password == data.get('password'):
+            if lost_account.is_lost == data.get('to_lost'):
+                return JsonResponse({"error": "The card has been lost", 'state': False}, status=400)
+            lost_accounts.update(is_lost=data.get('to_lost'))
+            return_data = {'state': True}
+            return JsonResponse(return_data, status=200)
         else:
-            return JsonResponse({"error": "Card not found", 'state': False}, status=404)
+            return JsonResponse({"error": "Password is Wrong", 'state': False}, status=400)
     elif request.method == 'OPTION':
         return JsonResponse({"success": "OPTION operation"}, status=200)
     else:

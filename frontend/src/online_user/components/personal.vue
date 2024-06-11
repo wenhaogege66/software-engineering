@@ -77,7 +77,7 @@ methods: {
       })
     }
   }
-}
+  }
   </script>
   
   <style scoped>

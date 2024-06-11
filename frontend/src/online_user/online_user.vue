@@ -59,19 +59,20 @@
 
     data() {
       return {
-        user_id:null,
         index:{
-          home: "/online_user/home" + "?user_id=" + this.user_id,
-          personal: "/online_user/personal" + "?user_id=" + this.user_id,
-          account: "/online_user/account" + "?user_id=" + this.user_id,
-          record: "/online_user/record" + "?user_id=" + this.user_id,
-        }
+          home: "/online_user/home",
+          personal: "/online_user/personal",
+          account: "/online_user/account",
+          record: "/online_user/record",
+        },
+        user_id:0
       }
     },
     methods: {
     },
     mounted() { // 当页面被渲染时
       // 获取 URL 中的查询字符串
+      console.log(this.$route)
       let search = window.location.search;
       if(search!==undefined)
       {
@@ -79,6 +80,12 @@
         let obj = JSON.parse(urlParams.get('user_id'));
         this.user_id = obj;
         console.log(this.user_id);
+      }
+      this.index={
+        home: "/online_user/home" + "?user_id=" + JSON.stringify(this.user_id),
+        personal: "/online_user/personal" + "?user_id=" + JSON.stringify(this.user_id),
+        account: "/online_user/account" + "?user_id=" + JSON.stringify(this.user_id),
+        record: "/online_user/record" + "?user_id=" + JSON.stringify(this.user_id),
       }
     }
   }
