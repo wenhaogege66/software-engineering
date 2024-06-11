@@ -111,6 +111,136 @@ def user_frozen(request):
         return JsonResponse({"error": "Method not allowed",'state': True}, status=405)
     
 @csrf_exempt
+def user_unfrozen(request):
+    # print("文豪说看看这个密码")
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        print('看看data:{}'.format(data))
+        filter_online_user = online_user.objects.filter(user_id=data.get('user_id'))
+        # print('看看filter_online_manager:{}'.format(filter_online_manager.account))
+        if filter_online_user.exists():
+            cur_user =  online_user.objects.get(user_id=data.get('user_id'))
+            filter_online_user = online_user.objects.filter(user_name=data.get('user_name'))            
+            print('看看filter_online_user:{}'.format(cur_user.user_name))
+            if cur_user.is_frozen == True:
+                cur_user.is_frozen=False
+                cur_user.save()
+                return_data = {'state': True}
+                return JsonResponse(return_data, status=200)
+            else:
+                return JsonResponse({"error": "你逗我呢，宝贝",'state': False}, status=403)
+        else:
+            return JsonResponse({"error": "User don't exist",'state': False}, status=403)
+    elif request.method == 'OPTION':
+        return JsonResponse({"success": "OPTION operation"}, status=200)
+    else:
+        return JsonResponse({"error": "Method not allowed",'state': True}, status=405)
+    
+@csrf_exempt
+def user_lost(request):
+    # print("文豪说看看这个密码")
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        print('看看data:{}'.format(data))
+        filter_online_user = online_user.objects.filter(user_id=data.get('user_id'))
+        # print('看看filter_online_manager:{}'.format(filter_online_manager.account))
+        if filter_online_user.exists():
+            cur_user =  online_user.objects.get(user_id=data.get('user_id'))
+            filter_online_user = online_user.objects.filter(user_name=data.get('user_name'))            
+            print('看看filter_online_user:{}'.format(cur_user.user_name))
+            if cur_user.is_lost == False:
+                cur_user.is_lost=True
+                cur_user.save()
+                return_data = {'state': True}
+                return JsonResponse(return_data, status=200)
+            else:
+                return JsonResponse({"error": "已经挂失了，宝贝",'state': False}, status=403)
+        else:
+            return JsonResponse({"error": "User don't exist",'state': False}, status=403)
+    elif request.method == 'OPTION':
+        return JsonResponse({"success": "OPTION operation"}, status=200)
+    else:
+        return JsonResponse({"error": "Method not allowed",'state': True}, status=405)
+    
+@csrf_exempt
+def user_unlost(request):
+    # print("文豪说看看这个密码")
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        print('看看data:{}'.format(data))
+        filter_online_user = online_user.objects.filter(user_id=data.get('user_id'))
+        # print('看看filter_online_manager:{}'.format(filter_online_manager.account))
+        if filter_online_user.exists():
+            cur_user =  online_user.objects.get(user_id=data.get('user_id'))
+            filter_online_user = online_user.objects.filter(user_name=data.get('user_name'))            
+            print('看看filter_online_user:{}'.format(cur_user.user_name))
+            if cur_user.is_lost == True:
+                cur_user.is_lost=False
+                cur_user.save()
+                return_data = {'state': True}
+                return JsonResponse(return_data, status=200)
+            else:
+                return JsonResponse({"error": "别闹，宝贝",'state': False}, status=403)
+        else:
+            return JsonResponse({"error": "User don't exist",'state': False}, status=403)
+    elif request.method == 'OPTION':
+        return JsonResponse({"success": "OPTION operation"}, status=200)
+    else:
+        return JsonResponse({"error": "Method not allowed",'state': True}, status=405)
+    
+@csrf_exempt
+def user_lost(request):
+    # print("文豪说看看这个密码")
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        print('看看data:{}'.format(data))
+        filter_online_user = online_user.objects.filter(user_id=data.get('user_id'))
+        # print('看看filter_online_manager:{}'.format(filter_online_manager.account))
+        if filter_online_user.exists():
+            cur_user =  online_user.objects.get(user_id=data.get('user_id'))
+            filter_online_user = online_user.objects.filter(user_name=data.get('user_name'))            
+            print('看看filter_online_user:{}'.format(cur_user.user_name))
+            if cur_user.is_lost == False:
+                cur_user.is_lost=True
+                cur_user.save()
+                return_data = {'state': True}
+                return JsonResponse(return_data, status=200)
+            else:
+                return JsonResponse({"error": "已经挂失了，宝贝",'state': False}, status=403)
+        else:
+            return JsonResponse({"error": "User don't exist",'state': False}, status=403)
+    elif request.method == 'OPTION':
+        return JsonResponse({"success": "OPTION operation"}, status=200)
+    else:
+        return JsonResponse({"error": "Method not allowed",'state': True}, status=405)
+    
+@csrf_exempt
+def user_unlost(request):
+    # print("文豪说看看这个密码")
+    if request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        print('看看data:{}'.format(data))
+        filter_online_user = online_user.objects.filter(user_id=data.get('user_id'))
+        # print('看看filter_online_manager:{}'.format(filter_online_manager.account))
+        if filter_online_user.exists():
+            cur_user =  online_user.objects.get(user_id=data.get('user_id'))
+            filter_online_user = online_user.objects.filter(user_name=data.get('user_name'))            
+            print('看看filter_online_user:{}'.format(cur_user.user_name))
+            if cur_user.is_lost == True:
+                cur_user.is_lost=False
+                cur_user.save()
+                return_data = {'state': True}
+                return JsonResponse(return_data, status=200)
+            else:
+                return JsonResponse({"error": "别闹，宝贝",'state': False}, status=403)
+        else:
+            return JsonResponse({"error": "User don't exist",'state': False}, status=403)
+    elif request.method == 'OPTION':
+        return JsonResponse({"success": "OPTION operation"}, status=200)
+    else:
+        return JsonResponse({"error": "Method not allowed",'state': True}, status=405)
+    
+@csrf_exempt
 def blacklist_account_delet(request):
     # print("文豪说看看这个密码")
     if request.method == 'POST':
@@ -169,6 +299,8 @@ def user_data_query(request):
             "phone_num": black.phone_num,
             "id_card": black.identity_card,
             "user_id": black.user_id,
+            "is_frozen": black.is_frozen,
+            "is_lost": black.is_lost,
         } for black in filter_blacks]
         # for res in results:
         #     print(res)
