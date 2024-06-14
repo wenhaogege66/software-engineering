@@ -35,10 +35,22 @@
             size="large"
             @click="
               (LostVisible = true),
-                ((Lost_id_Id = scope.row.user_id),
-                (UnLost_id = scope.row.user_id))
+                ((Lost_Id = scope.row.user_id),
+                (UnLost_Id = scope.row.user_id))
             "
             >Lost</el-button
+          >
+          <el-button
+            link
+            type="danger"
+            size="large"
+            @click="
+              (BlacklistVisible = true),
+                ((Black_Id = scope.row.user_id),
+                
+                (UnBlack_Id = scope.row.user_id))
+            "
+            >Balicklist</el-button
           >
         </template>
       </el-table-column>
@@ -81,6 +93,40 @@
         </span>
       </template>
     </el-dialog>
+
+    <el-dialog
+      v-model="BlacklistVisible"
+      title="添加黑名单"
+      width="30%"
+      align-center
+      :before-close="handleClose"
+    >
+    <div
+        style="
+          margin-left: 2vw;
+          font-weight: bold;
+          font-size: 1rem;
+          margin-top: 20px;
+        "
+      >
+        管理员账号：
+        <el-input
+          v-model="newBlack_manager_name"
+          style="width: 12.5vw"
+          clearable
+        />
+      </div>
+      <template #footer>
+        <span>
+          <el-button type="primary" @click="Blacklist()">确认添加至黑名单</el-button>
+        </span>
+        <span>
+          <el-button type="danger" @click="UnBlacklist()" style="margin-left: 15px"
+            >取消该用户黑名单</el-button
+          >
+        </span>
+      </template>
+    </el-dialog>
   </el-scrollbar>
 </template>
 <script>
@@ -91,14 +137,18 @@ import { ElMessage } from "element-plus";
 export default {
   data() {
     return {
-      Lost_id: 0,
+      newBlack_manager_name: "",
+      Lost_Id: 0,
       Frozen_Id: 0,
       Delete_Id: 0,
-      UnLost_id: 0,
+      UnLost_Id: 0,
       UnFrozen_Id: 0,
+      Black_Id: 0,
+      UnBlack_Id: 0,
       UnDelete_Id: 0,
       user_datas: [],
       LostVisible: false,
+      BlacklistVisible:false,
       FrozenVisible: false,
       DeleteVisible: false,
     };
@@ -149,11 +199,46 @@ export default {
           ElMessage.error(error.response.data.error);
         });
     },
+    async Blacklist() {
+      console.log("Black_Id:"+this.Black_Id);
+      this.BlacklistVisible = false;
+      
+      axios
+        .post("/manager/blacklist_add/", {
+          manager_name: this.newBlack_manager_name,
+          user_id: this.Black_Id,
+        })
+        .then((response) => {
+          console.log(response);
+          ElMessage.success("拉黑成功"); // 显示消息提醒
+          this.QueryUserData();
+        })
+        .catch((error) => {
+          // console.log("有错误");
+          ElMessage.error(error.response.data.error);
+        });
+    },
+    async UnBlacklist() {
+      this.BlacklistVisible = false;
+      axios
+        .post("/manager/blacklist_delet/", {
+          user_id: this.UnBlack_Id,
+        })
+        .then((response) => {
+          console.log(response);
+          ElMessage.success("已从黑名单移除"); // 显示消息提醒
+          this.QueryUserData();
+        })
+        .catch((error) => {
+          // console.log("有错误");
+          ElMessage.error(error.response.data.error);
+        });
+    },
     async Lost() {
       this.LostVisible = false;
       axios
         .post("/manager/user_lost/", {
-          user_id: this.Lost_id,
+          user_id: this.Lost_Id,
         })
         .then((response) => {
           console.log(response);
@@ -171,7 +256,7 @@ export default {
       // console.log("看看这里喔：", this.UnLost_id);
       axios
         .post("/manager/user_unlost/", {
-          user_id: this.UnLost_id,
+          user_id: this.UnLost_Id,
         })
         .then((response) => {
           console.log(response);

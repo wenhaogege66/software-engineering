@@ -47,9 +47,9 @@
           margin-top: 20px;
         "
       >
-        用户名：
+        用户ID：
         <el-input
-          v-model="newBlack_user_name"
+          v-model="newBlack_user_Id"
           style="width: 12.5vw"
           clearable
         />
@@ -101,6 +101,7 @@ import { ElMessage } from "element-plus";
 export default {
   data() {
     return {
+      newBlack_user_Id: 0,
       newBlack_user_name: "",
       newBlack_manager_name: "",
       BlackInfo: {},
@@ -125,7 +126,7 @@ export default {
       axios
         .post("/manager/blacklist_add/", {
           manager_name: this.newBlack_manager_name,
-          user_name: this.newBlack_user_name,
+          user_id: this.newBlack_user_Id,
         })
         .then((response) => {
           console.log(response);
