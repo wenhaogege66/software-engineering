@@ -298,7 +298,7 @@ def user_account_transfer(request):
                 account_in_id=data.get('account_in_id'),
                 account_out_id=data.get('account_out_id'),
                 # --此处存疑--
-                transfer_date=datetime.datetime.now(),
+                transfer_date=datetime.now(),
                 # -----
                 transfer_amount=data.get('transfer_amount'),
                 cashier_id=0 # 0 作为默认互联网转账的cashier_id
