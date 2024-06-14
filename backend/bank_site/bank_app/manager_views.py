@@ -56,11 +56,12 @@ def blacklist_account_add(request):
         if filter_online_manager.exists():
             # 用户存在开始对照密码
             cur_manager =  online_bank_manager.objects.get(account=data.get('manager_name'))
-            filter_online_user = online_user.objects.filter(user_name=data.get('user_name'))
+            #print('看看user_id:{}'+data.get('user_id'))
+            filter_online_user = online_user.objects.filter(user_id=data.get('user_id'))
             print('看看filter_online_manager:{}'.format(cur_manager.account))
             
             if filter_online_user.exists():
-                cur_user =  online_user.objects.get(user_name=data.get('user_name'))
+                cur_user =  online_user.objects.get(user_id=data.get('user_id'))
                 print('看看filter_online_user:{}'.format(cur_user.user_name))
                 if cur_user.is_blacklisted == False:
                     if not BlackList.objects.filter(user_id=cur_user.user_id).exists():
@@ -251,7 +252,7 @@ def blacklist_account_delet(request):
         if filter_online_user.exists():
             # 用户存在开始对照密码
             cur_user =  online_user.objects.get(user_id=data.get('user_id'))
-            filter_online_user = online_user.objects.filter(user_name=data.get('user_name'))            
+            filter_online_user = online_user.objects.filter(user_id=data.get('user_id'))
             print('看看filter_online_user:{}'.format(cur_user.user_name))
             if cur_user.is_blacklisted == True:
                 if  BlackList.objects.filter(user_id=cur_user.user_id).exists():
