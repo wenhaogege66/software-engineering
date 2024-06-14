@@ -11,8 +11,15 @@
     <p style="font-weight: bold;font-size: larger;margin: 10px" >电话号码 : {{user_info.phone_num}}</p>
   </div>
 
-    <div style="margin-top: 40px; margin-left: 40px; font-size: 1.5em; font-weight: bold;">
-      账户列表/卡包
+    <div style="display: flex;flex-direction: row">
+      <div style="margin-top: 40px; margin-left: 40px; font-size: 1.5em; font-weight: bold;">
+        账户列表/卡包
+      </div>
+      <el-button @click="RefreshCards" style="margin-top: 40px; margin-left: 15px;border-radius: 50%;width: 40px;height: 40px">
+        <el-icon>
+        <RefreshLeft />
+        </el-icon>
+      </el-button>
     </div>
     <div style="display: flex;flex-wrap: wrap; justify-content: start;">
     <!-- 借书证卡片 -->
@@ -111,7 +118,7 @@
 
 <script>
 import axios from 'axios';
-import {Delete, DocumentChecked, DocumentDelete, Edit, Plus, Search} from '@element-plus/icons-vue'
+import {Delete, DocumentChecked, DocumentDelete, Edit, Plus, RefreshLeft, Search} from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { ref } from 'vue'
 
@@ -120,7 +127,7 @@ const TimeDepositVisible = ref(false)
 const TotalDepositVisible = ref(false)
 
 export default{
-  components: {Plus},
+  components: {RefreshLeft, Plus},
   computed: {
     DocumentChecked() {
       return DocumentChecked
@@ -175,6 +182,19 @@ export default{
     }
   },
   methods: {
+    RefreshCards(){
+      axios.post("http://127.0.0.1:8000/user/bind_cards/",
+          { // 请求体
+            user_id: this.user_id,
+          })
+          .then(response => {
+            ElMessage.success(response.data.success) // 显示消息提醒
+            this.QueryCards() // 重新查询借书证以刷新页面
+          }).catch(error=>{
+        ElMessage.error(error.response.data.error);
+      })
+      this.QueryCards()
+    },
     /*ConfirmNewCard(){
       // 发出POST请求
       axios.post("http://127.0.0.1:8000/user/bind_card",
@@ -230,6 +250,7 @@ export default{
       let response = axios.get('http://127.0.0.1:8000/user/user_info',
           {params:{user_id: this.user_id}})
           .then(response=> {
+            this.user_info.user_id = this.$route.query.user_id;
             this.user_info.user_name = response.data.user_name;
             this.user_info.phone_num = response.data.phone_num;
           }).catch(error=>{

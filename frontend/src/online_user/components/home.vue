@@ -13,7 +13,7 @@
                     <el-input style="width: 200px" v-model="toTransferInfo.account_out_id">
                     </el-input>
                   </el-form-item >
-                  <el-form-item label="密码" >
+                  <el-form-item label="密码" type="password">
                     <el-input style="width: 200px" v-model="toTransferInfo.password" >
                     </el-input>
                   </el-form-item>

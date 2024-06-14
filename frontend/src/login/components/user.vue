@@ -6,37 +6,33 @@
     <div style="width:45%;margin:0 auto; padding-top:5vh;">
       <div class="loginBox">
         <!-- 卡片标题 -->
-        <div style="font-size: 25px; font-weight: bold;"></div>
-
 
 
         <!-- 卡片内容 -->
         <div style="margin-left: 10px; text-align: start; font-size: 16px;">
-          <div style="height: 70px">
-            <div style = "margin-left: 7vw; font-weight: bold; font-size: 1.5rem; margin-top: 5px;">
-            用户登录
+          <div style=" height: 40px;margin: auto;display: flex;align-items: center;justify-content: center">
+            <div style ="font-size: 1.5rem;font-weight: bolder; margin-top: 20px;text-align: center">
+              用 户 登 录
+            </div>
           </div>
-          </div>
-          <div style = "margin-left: 3vw; font-weight: bold; font-size: 1rem; margin-top: 5px;">
-            账户名：
-            <el-input v-model="account" style="width: 12.5vw; margin-left: 1rem" maxlength="18" clearable/>
-          </div>
-          <div style="height: 25px"></div>
-          <div style = "margin-left: 4.3vw; font-weight: bold; font-size: 1rem; margin-top: 5px;">
-            密码：
-            <el-input v-model="password" style="width: 12.5vw; margin-left: 1rem" type="password" maxlength="20" clearable/>
-          </div>
-          <div style="height: 40px"></div>
+          <el-divider/>
+          <el-form label-position="right" label-width="100px" style=" font-weight: bolder; font-size: 10px">
+            <el-form-item label="用户名"  style = "margin-top: 5px;">
+              <el-input v-model="account" style="width: 12.5vw; margin-left: 1rem" maxlength="18" clearable/>
+            </el-form-item>
+            <el-form-item label="密码" style = "margin-top: 5px;">
+              <el-input v-model="password" style="width: 12.5vw; margin-left: 1rem" type="password" maxlength="20" clearable/>
+            </el-form-item>
+          </el-form>
         </div>
         <!-- 卡片操作 -->
-        <div style="margin-top: 10px; display:flex; margin-left: 5rem;">
+        <div style="margin-top: 30px; display:flex;justify-content: center">
           <el-button type="primary"  @click="handle()">
             登录
           </el-button>
-
-          <el-link :icon="Edit" href = "signup" style="margin-left: 3rem;">
-            没有账户，进行注册
-          </el-link>
+          <el-button :icon="Edit" @click = "signup">
+            注册新用户
+          </el-button>
         </div>
       </div>
     </div>
@@ -46,7 +42,13 @@
 <script>
 import axios from "axios";
 import { ElMessage } from 'element-plus'
+import {Edit} from "@element-plus/icons-vue";
 export default{
+  computed: {
+    Edit() {
+      return Edit
+    }
+  },
   data(){
     return{
       account: "", // 用户登录，还不知道用什么
@@ -57,6 +59,9 @@ export default{
     }
   },
   methods: {
+    signup(){
+      window.location.href = "/login/signup";
+    },
     handle (){
       // console.log( "文豪说看看这个6666")
       axios.post('http://127.0.0.1:8000/user/sign_in/',{

@@ -48,6 +48,12 @@
               </el-icon>
               <span>交易记录</span>
             </el-menu-item>
+            <el-menu-item @click="Exit">
+              <el-icon>
+                <SwitchButton />
+              </el-icon>
+              <span>退出</span>
+            </el-menu-item>
             <div style="height: 30px"></div>
   <!--          <a href="/" style="margin-left: 40px;">-->
   <!--            <el-button type="danger">-->
@@ -70,7 +76,10 @@
   </template>
 
   <script>
+  import {SwitchButton} from "@element-plus/icons-vue";
+
   export default {
+    components: {SwitchButton},
 
     data() {
       return {
@@ -84,6 +93,9 @@
       }
     },
     methods: {
+      Exit() {
+        window.location.href = "/login";
+      }
     },
     mounted() { // 当页面被渲染时
       // 获取 URL 中的查询字符串
