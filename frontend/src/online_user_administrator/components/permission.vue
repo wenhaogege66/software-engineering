@@ -18,6 +18,7 @@
       <el-table-column prop="is_lost" label="是否挂失" width="120" />
       <el-table-column fixed="right" label="Operations" width="150">
         <template #default="scope">
+          <div>
           <el-button
             link
             type="primary"
@@ -27,8 +28,10 @@
                 ((Frozen_Id = scope.row.user_id),
                 (UnFrozen_Id = scope.row.user_id))
             "
-            >Frozen</el-button
+            >  Frozen</el-button
           >
+        </div>
+        <div>
           <el-button
             link
             type="danger"
@@ -40,6 +43,8 @@
             "
             >Lost</el-button
           >
+        </div>
+        <div>
           <el-button
             link
             type="danger"
@@ -52,6 +57,7 @@
             "
             >Balicklist</el-button
           >
+        </div>
         </template>
       </el-table-column>
     </el-table>
